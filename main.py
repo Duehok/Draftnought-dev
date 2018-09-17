@@ -4,7 +4,7 @@ Builds the main window menu bar and TODO: associated keyboard shortcuts
 Manages root functions: load program config, load file, save file.
 """
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, Text
 from tkinter import ttk
 import sys
 import logging
@@ -13,6 +13,10 @@ from window import topview, structeditor, funnelseditor, sideview
 from window.framework import CommandStack
 import model.shipdata as sd
 import parameters_loader
+
+_MAIN_ROW = 0
+
+_LOG_ROW = _MAIN_ROW +1
 
 _SIDEVIEW_ROW = 0
 _TOPVIEW_ROW = _SIDEVIEW_ROW+1
@@ -35,6 +39,13 @@ class MainWindow(tk.Tk):
         self.resizable(False, False)
         self.parameters = parameters
         self.command_stack = CommandStack()
+
+        logging.basicConfig(level = logging.DEBUG)
+        logging_widget = Text(self, height=6)
+        logger = logging.getLogger()
+        logger.addHandler(LogToWidget(logging_widget))
+
+        logging_widget.grid(row=_LOG_ROW, sticky=tk.W+tk.E)
 
         menubar = tk.Menu(self)
         self.config(menu=menubar)
@@ -59,7 +70,7 @@ class MainWindow(tk.Tk):
         self.bind("<Control-y>", self.do_redo)
 
         self.center_frame = ttk.Button(self, text="Load ship file", command=self.do_load)
-        self.center_frame.grid()
+        self.center_frame.grid(row=_MAIN_ROW)
 
         try:
             with open(self.parameters.app_config["last_file_path"]) as file:
@@ -124,7 +135,7 @@ class MainWindow(tk.Tk):
                                        self.current_ship_data,
                                        new_command_stack,
                                        self.parameters)
-        self.center_frame.grid(row=0, column=0)
+        self.center_frame.grid(row=_MAIN_ROW)
         #if load was OK, forget the old command stack
         self.command_stack = new_command_stack
         self.winfo_toplevel().title(pathlib.Path(path).name)
@@ -194,6 +205,13 @@ class ShipEditor(tk.Frame):
         (sideview.SideView(self, ship_data)
          .grid(row=_SIDEVIEW_ROW, column=_SIDEVIEW_COL, sticky=tk.W))
 
+class LogToWidget(logging.Handler):
+    def __init__(self, text_widget):
+        super().__init__()
+        self._text_widget = text_widget
+
+    def emit(self, record):
+        self._text_widget.insert(tk.END, record.getMessage() + "\n")
+
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG,stream=sys.stdout )
     MainWindow(parameters_loader.Parameters()).mainloop()
