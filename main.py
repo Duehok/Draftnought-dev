@@ -209,9 +209,20 @@ class LogToWidget(logging.Handler):
     def __init__(self, text_widget):
         super().__init__()
         self._text_widget = text_widget
+        self._text_widget.tag_config("Debug", background = "pale green")
+        self._text_widget.tag_config("Info", background = "spring green")
+        self._text_widget.tag_config("Warning", background = "orange")
+        self._text_widget.tag_config("Error", background = "red")
 
     def emit(self, record):
-        self._text_widget.insert(tk.END, record.getMessage() + "\n")
+        if record.levelno == logging.DEBUG:
+            self._text_widget.insert(tk.END, record.getMessage() + "\n", "Debug")
+        if record.levelno == logging.INFO:
+            self._text_widget.insert(tk.END, record.getMessage() + "\n", "Info")
+        if record.levelno == logging.WARNING:
+            self._text_widget.insert(tk.END, record.getMessage() + "\n", "Warning")
+        if record.levelno == logging.ERROR:
+            self._text_widget.insert(tk.END, record.getMessage() + "\n", "Error")
 
 if __name__ == "__main__":
     MainWindow(parameters_loader.Parameters()).mainloop()
