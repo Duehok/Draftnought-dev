@@ -2,6 +2,7 @@
 
 Contains default path for those files
 files in json format
+#TODO:reduce copy pasta
 """
 import json
 import jsonschema
@@ -22,25 +23,12 @@ DEFAULT_FILES = {
     "turrets_outlines":"turrets_outlines.json",
     }
 
-SHIP_TYPES = ["BB", "BC", "B", "CA", "CL", "DD", "MS", "AMC"]
 
-#gun caliber must be defined at least to this value
-MIN_MAX_GUN_CALIBER = 18
-MAX_GUNS_PER_TURRET = 4
-DEFAULT_TURRETS_SCALE = [0.22, 0.26, 0.306, 0.347,
-                         0.387, 0.422, 0.458, 0.536,
-                         0.615, 0.657, 0.700, 0.746,
-                         0.793, 0.867, 0.942, 0.971,
-                         1.000, 1.091, 1.091
-                        ]
 
 DEFAULT_APP_CONFIG = {
     "last_file_path" : "",
     "max_points_in_structure":21
     }
-
-DEFAULT_TURRET_OUTLINE = [[-7.4, 12.9], [-10, -0.1], [-6.5, -7.4], [-1.2, -9.6],
-                          [-0.7, -30], [0.7, -30], [1.2, -9.6], [6.5, -7.4], [10, -0], [7.4, 12.9]]
 
 def read_ships_hlengths():
     """build the half lengths data
@@ -55,17 +43,24 @@ def read_ships_hlengths():
     path = DEFAULT_FILES["ships_hlengths"]
     try:
         with open(path) as file:
-            hlengths = json.load(file, object_hook=convert_str_key_to_int)
+            raw_hlengths = json.load(file)
     except (OSError, json.JSONDecodeError) as error:
         logging.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
-        hlengths = {ship_type:{200000:200} for ship_type in SHIP_TYPES}
-        return hlengths
+        return schemas.DEFAULT_HALF_LENGTHS
 
-    for ship_type in SHIP_TYPES:
-        if not ship_type in hlengths.keys():
-            hlengths[ship_type] = {200000:200}
-            logging.error("Missing definition for ship type %s from file %s",
-                      ship_type, pathlib.Path(path).resolve())
+    try:
+        jsonschema.validate(raw_hlengths, schemas.HALF_LENGTHS_SCHEMA)
+    except jsonschema.ValidationError as error:
+        logging.error("Valid JSON but invalid Schema in: %s, default values used instead", path)
+        logging.warning("Valid JSON but invalid Schema in: %s\n, description:\n%s", path, error)
+        return schemas.DEFAULT_HALF_LENGTHS
+
+    #convert the keys of the lengths to allow comparison:
+
+    hlengths = {}
+    for ship_type, lengths_dicts in raw_hlengths.items():
+        hlengths[ship_type] = convert_str_key_to_int(lengths_dicts)
+
     return hlengths
 
 def read_hulls_shapes():
@@ -86,14 +81,14 @@ def read_hulls_shapes():
             shapes = json.load(file)
     except (OSError, json.JSONDecodeError) as error:
         logging.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
-        shapes = [[] for ship_type in SHIP_TYPES]
-        return shapes
+        return schemas.DEFAULT_HULLS_SHAPES
+    try:
+        jsonschema.validate(shapes, schemas.HULLS_SHAPES_SCHEMA)
+    except jsonschema.ValidationError as error:
+        logging.error("Valid JSON but invalid Schema in: %s, default values used instead", path)
+        logging.warning("Valid JSON but invalid Schema in: %s\n, description:\n%s", path, error)
+        return schemas.DEFAULT_HULLS_SHAPES
 
-    for ship_type in SHIP_TYPES:
-        if not ship_type in shapes.keys():
-            shapes[ship_type] = []
-            logging.error("Missing hull outline shape for ship type %s from file %s",
-                      ship_type, pathlib.Path(path).resolve())
     return shapes
 
 def read_turrets_positions():
@@ -107,15 +102,15 @@ def read_turrets_positions():
             turrets_positions = json.load(file)
     except (OSError, json.JSONDecodeError) as error:
         logging.error("Could not load or read file: %s\n%s", path, error)
-        return schemas.DEFAULT_TURRET_POSITIONS
+        return schemas.DEFAULT_TURRETS_POSITION
 
     try:
-        jsonschema.validate(turrets_positions, schemas.TURRET_SCHEMA)
+        jsonschema.validate(turrets_positions, schemas.TURRETS_POSITION_SCHEMA)
     except jsonschema.ValidationError as error:
-        #add return default
+        
         logging.error("Valid JSON but invalid Schema in: %s, default values used instead", path)
         logging.warning("Valid JSON but invalid Schema in: %s\n, description:\n%s", path, error)
-        return schemas.DEFAULT_TURRET_POSITIONS
+        return schemas.DEFAULT_TURRETS_POSITION
 
     return turrets_positions
 
@@ -133,17 +128,15 @@ def read_turrets_scale():
             turrets_scale = json.load(file)
     except (OSError, json.JSONDecodeError) as error:
         logging.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
-        return DEFAULT_TURRETS_SCALE
+        return schemas.DEFAULT_TURRETS_SCALE
 
-    if len(turrets_scale) <= MIN_MAX_GUN_CALIBER:
-        logging.error("Turret scale defined up to caliber %s instead of %s in file %s",
-                  len(turrets_scale)-1,
-                  MIN_MAX_GUN_CALIBER,
-                  pathlib.Path(path).resolve())
-        turrets_scale = (turrets_scale +
-                         [DEFAULT_TURRETS_SCALE[i]
-                          for i in range(len(turrets_scale, len(DEFAULT_TURRETS_SCALE)))])
-        return turrets_scale
+    try:
+        jsonschema.validate(turrets_scale, schemas.TURRETS_SCALE_SCHEMA)
+    except jsonschema.ValidationError as error:  
+        logging.error("Valid JSON but invalid Schema in: %s, default values used instead", path)
+        logging.warning("Valid JSON but invalid Schema in: %s\n, description:\n%s", path, error)
+        return schemas.DEFAULT_TURRETS_SCALE
+
     return turrets_scale
 
 def read_turrets_outlines():
@@ -164,13 +157,16 @@ def read_turrets_outlines():
             turrets_outlines = json.load(file)
     except (OSError, json.JSONDecodeError) as error:
         logging.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
-        return [DEFAULT_TURRET_OUTLINE for i in range(0, MAX_GUNS_PER_TURRET)]
+        return schemas.DEFAULT_TURRETS_OUTLINE
 
-    if len(turrets_outlines)+1 < MAX_GUNS_PER_TURRET:
-        logging.error("Not all gun per turret defined in file: %s", pathlib.Path(path).resolve())
-        turrets_outlines = (turrets_outlines
-                            + [DEFAULT_TURRET_OUTLINE
-                               for i in range(len(turrets_outlines), MAX_GUNS_PER_TURRET)])
+    try:
+        jsonschema.validate(turrets_outlines, schemas.TURRETS_OUTLINE_SCHEMA)
+    except jsonschema.ValidationError as error:
+        
+        logging.error("Valid JSON but invalid Schema in: %s, default values used instead", path)
+        logging.warning("Valid JSON but invalid Schema in: %s\n, description:\n%s", path, error)
+        return schemas.DEFAULT_TURRETS_OUTLINE
+
     return turrets_outlines
 
 def read_app_param():
@@ -265,5 +261,5 @@ def convert_str_key_to_int(data):
                 break
             new_dict[newk] = value
         if could_be_parsed:
-            return OrderedDict(sorted(new_dict.items()))
+            return new_dict
     return data
