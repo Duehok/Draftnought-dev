@@ -4,17 +4,17 @@ Contains default path for those files
 files in json format
 """
 import json
+import jsonschema
 import logging
 from collections import OrderedDict
 import pathlib
 import appdirs
-log = logging.getLogger()
+import schemas
 
-#TODO: simplify list of files
+
 APP_CONFIG = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
-
+#TODO: simplify list of files
 DEFAULT_FILES = {
-    "app_config" : "app_config.json",
     "hulls_shapes" : "hull_shapes.json",
     "ships_hlengths" : "lengths.json",
     "turrets_positions": "turrets_positions.json",
@@ -23,10 +23,6 @@ DEFAULT_FILES = {
     }
 
 SHIP_TYPES = ["BB", "BC", "B", "CA", "CL", "DD", "MS", "AMC"]
-TURRETS = ["1", "2", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
-           "Q", "R", "S", "T", "V", "W", "X", "Y", "3", "4"]
-DEFAULT_TURRET_POSITION = {"positions": [(1000, 1000), (1000, 1000), (1000, 1000), (1000, 1000)],
-                           "to_bow": True}
 
 #gun caliber must be defined at least to this value
 MIN_MAX_GUN_CALIBER = 18
@@ -61,14 +57,14 @@ def read_ships_hlengths():
         with open(path) as file:
             hlengths = json.load(file, object_hook=convert_str_key_to_int)
     except (OSError, json.JSONDecodeError) as error:
-        log.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
+        logging.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
         hlengths = {ship_type:{200000:200} for ship_type in SHIP_TYPES}
         return hlengths
 
     for ship_type in SHIP_TYPES:
         if not ship_type in hlengths.keys():
             hlengths[ship_type] = {200000:200}
-            log.error("Missing definition for ship type %s from file %s",
+            logging.error("Missing definition for ship type %s from file %s",
                       ship_type, pathlib.Path(path).resolve())
     return hlengths
 
@@ -89,14 +85,14 @@ def read_hulls_shapes():
         with open(path) as file:
             shapes = json.load(file)
     except (OSError, json.JSONDecodeError) as error:
-        log.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
+        logging.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
         shapes = [[] for ship_type in SHIP_TYPES]
         return shapes
 
     for ship_type in SHIP_TYPES:
         if not ship_type in shapes.keys():
             shapes[ship_type] = []
-            log.error("Missing hull outline shape for ship type %s from file %s",
+            logging.error("Missing hull outline shape for ship type %s from file %s",
                       ship_type, pathlib.Path(path).resolve())
     return shapes
 
@@ -110,15 +106,17 @@ def read_turrets_positions():
         with open(path) as file:
             turrets_positions = json.load(file)
     except (OSError, json.JSONDecodeError) as error:
-        log.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
-        turrets_positions = {turret:DEFAULT_TURRET_POSITION for turret in TURRETS}
-        return turrets_positions
+        logging.error("Could not load or read file: %s\n%s", path, error)
+        return schemas.DEFAULT_TURRET_POSITIONS
 
-    for turret in TURRETS:
-        if not turret in turrets_positions:
-            log.error("Missing turret position %s from file %s",
-                      turret, pathlib.Path(path).resolve())
-            turrets_positions[turret] = DEFAULT_TURRET_POSITION
+    try:
+        jsonschema.validate(turrets_positions, schemas.TURRET_SCHEMA)
+    except jsonschema.ValidationError as error:
+        #add return default
+        logging.error("Valid JSON but invalid Schema in: %s, default values used instead", path)
+        logging.warning("Valid JSON but invalid Schema in: %s\n, description:\n%s", path, error)
+        return schemas.DEFAULT_TURRET_POSITIONS
+
     return turrets_positions
 
 def read_turrets_scale():
@@ -134,11 +132,11 @@ def read_turrets_scale():
         with open(path) as file:
             turrets_scale = json.load(file)
     except (OSError, json.JSONDecodeError) as error:
-        log.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
+        logging.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
         return DEFAULT_TURRETS_SCALE
 
     if len(turrets_scale) <= MIN_MAX_GUN_CALIBER:
-        log.error("Turret scale defined up to caliber %s instead of %s in file %s",
+        logging.error("Turret scale defined up to caliber %s instead of %s in file %s",
                   len(turrets_scale)-1,
                   MIN_MAX_GUN_CALIBER,
                   pathlib.Path(path).resolve())
@@ -165,11 +163,11 @@ def read_turrets_outlines():
         with open(path) as file:
             turrets_outlines = json.load(file)
     except (OSError, json.JSONDecodeError) as error:
-        log.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
+        logging.error("Could not load or read file: %s\n%s", pathlib.Path(path).resolve(), error)
         return [DEFAULT_TURRET_OUTLINE for i in range(0, MAX_GUNS_PER_TURRET)]
 
     if len(turrets_outlines)+1 < MAX_GUNS_PER_TURRET:
-        log.error("Not all gun per turret defined in file: %s", pathlib.Path(path).resolve())
+        logging.error("Not all gun per turret defined in file: %s", pathlib.Path(path).resolve())
         turrets_outlines = (turrets_outlines
                             + [DEFAULT_TURRET_OUTLINE
                                for i in range(len(turrets_outlines), MAX_GUNS_PER_TURRET)])
@@ -187,16 +185,16 @@ def read_app_param():
         with open(APP_CONFIG) as file:
             param = json.load(file)
     except OSError as error:
-        log.info("Could not load file: %s\n%s", APP_CONFIG.resolve(), error)
+        logging.info("Could not load file: %s\n%s", APP_CONFIG.resolve(), error)
         return DEFAULT_APP_CONFIG
     except json.JSONDecodeError as error:
-        log.error("Could not decode file: %s\n%s", APP_CONFIG.resolve(), error)
+        logging.error("Could not decode file: %s\n%s", APP_CONFIG.resolve(), error)
         return DEFAULT_APP_CONFIG
 
     for config, value in DEFAULT_APP_CONFIG.items():
         if config not in param.keys():
             param[config] = value
-            log.error("Missing definition %s from file %s", config, APP_CONFIG.resolve())
+            logging.error("Missing definition %s from file %s", config, APP_CONFIG.resolve())
     return param
 
 class Parameters:
@@ -238,9 +236,9 @@ class Parameters:
             pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
             with open(file_path, "w") as file:
                 json.dump(new_parameters, file)
-                log.info("Saved app parameters to %s", file_path)
+                logging.info("Saved app parameters to %s", file_path)
         except OSError as err:
-            log.error("Could not save app config file to: %s\n%s", file_path, err)
+            logging.error("Could not save app config file to: %s\n%s", file_path, err)
 
 def convert_str_key_to_int(data):
     """in a dictionary, convert to int the keys (assumed to be an int) that can be parsed to int
