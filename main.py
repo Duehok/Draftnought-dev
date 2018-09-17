@@ -80,7 +80,7 @@ class MainWindow(tk.Tk):
     def do_load(self, *_args):
         """React to keyboard shortcut"""
         logging.debug("Load file requested")
-        path = filedialogging.askopenfilename(filetypes=(("ship files", "*.?0d"),
+        path = filedialog.askopenfilename(filetypes=(("ship files", "*.?0d"),
                                                      ("all files", "*.*")))
         if path == "":
             logging.debug("Load canceled")
