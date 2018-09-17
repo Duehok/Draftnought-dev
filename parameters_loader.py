@@ -7,9 +7,12 @@ import json
 import logging
 from collections import OrderedDict
 import pathlib
+import appdirs
 log = logging.getLogger()
 
 #TODO: simplify list of files
+APP_CONFIG = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
+
 DEFAULT_FILES = {
     "app_config" : "app_config.json",
     "hulls_shapes" : "hull_shapes.json",
@@ -180,21 +183,20 @@ def read_app_param():
     Returns (dict):
         a dict with all the data
     """
-    path = DEFAULT_FILES["app_config"]
     try:
-        with open(path) as file:
+        with open(APP_CONFIG) as file:
             param = json.load(file)
     except OSError as error:
-        log.info("Could not load file: %s\n%s", pathlib.Path(path).resolve(), error)
+        log.info("Could not load file: %s\n%s", APP_CONFIG.resolve(), error)
         return DEFAULT_APP_CONFIG
     except json.JSONDecodeError as error:
-        log.error("Could not decode file: %s\n%s", pathlib.Path(path).resolve(), error)
+        log.error("Could not decode file: %s\n%s", APP_CONFIG.resolve(), error)
         return DEFAULT_APP_CONFIG
 
     for config, value in DEFAULT_APP_CONFIG.items():
         if config not in param.keys():
             param[config] = value
-            log.error("Missing definition %s from file %s", config, pathlib.Path(path).resolve())
+            log.error("Missing definition %s from file %s", config, APP_CONFIG.resolve())
     return param
 
 class Parameters:
@@ -227,13 +229,16 @@ class Parameters:
             file_path (str): path to the file that should be created or overwritten.
                 If not given, the default file path is used.
         """
+        
         if file_path is None:
-            file_path = DEFAULT_FILES["app_config"]
+            file_path = APP_CONFIG.resolve()
         if new_parameters is None:
             new_parameters = self.app_config
         try:
+            pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
             with open(file_path, "w") as file:
                 json.dump(new_parameters, file)
+                log.info("Saved app parameters to %s", file_path)
         except OSError as err:
             log.error("Could not save app config file to: %s\n%s", file_path, err)
 
