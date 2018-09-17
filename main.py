@@ -139,7 +139,7 @@ class MainWindow(tk.Tk):
                 If none given, a file picker dialog allows to choose a new or existing file
         """
         if path is None:
-            file = filedialogging.asksaveasfile(mode='w', filetypes=(("ship files", "*.*d"),
+            file = filedialog.asksaveasfile(mode='w', filetypes=(("ship files", "*.*d"),
                                                                  ("all files", "*.*")))
             if file is not None:
                 logging.debug("saving file to %s", file.name)
