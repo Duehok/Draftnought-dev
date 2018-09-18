@@ -20,11 +20,12 @@ TURRETS_POSITION_SCHEMA = (
             "type": "array",
             "items":
             {
-              "types":"array",
-              "items":[{ "type":"number"},{ "type":"number"}]
+              "items":[{ "type":"number"},{ "type":"number"}],
+              "additionalItems":False
             },
             "maxItems":4,
-            "minItems":1
+            "minItems":1,
+            "additionalItems":False
           }
         }
       }
@@ -126,4 +127,4 @@ HALF_LENGTHS_SCHEMA = (
   },
   "required":SHIP_TYPES
 })
-DEFAULT_HALF_LENGTHS = {ship_type:{2000000:200} for ship_type in SHIP_TYPES}
+DEFAULT_HALF_LENGTHS = {ship_type:{"2000000":200} for ship_type in SHIP_TYPES}
