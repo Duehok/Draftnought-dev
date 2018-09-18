@@ -196,7 +196,7 @@ class TopView(tk.Canvas):
             (__, mouse_funnel) = self._canvas_to_funnel((mouse_x, 0))
             vertex1_canvas = self._funnel_to_canvas((0-self._funnel_half_width, mouse_funnel-delta))
             vertex2_canvas = self._funnel_to_canvas((0+self._funnel_half_width, mouse_funnel+delta))
-            drawing_ids.append(self.create_oval(*vertex1_canvas, *vertex2_canvas, 
+            drawing_ids.append(self.create_oval(*vertex1_canvas, *vertex2_canvas,
                                                 fill="red", stipple="gray25"))
         return drawing_ids
 
@@ -254,7 +254,7 @@ class TopView(tk.Canvas):
             self._drawings_ids = self._drawings_ids + self._draw_turret(turret)
 
         if self._grid_on:
-            self._drawings_ids.append(self.create_image((0,0), image=self._grid, anchor=tk.NW))
+            self._drawings_ids.append(self.create_image((0, 0), image=self._grid, anchor=tk.NW))
 
     def _on_mouse_move(self, _event):
         self.redraw(self._active_editor)
@@ -268,5 +268,6 @@ class TopView(tk.Canvas):
             self._active_editor.update_to_coord(self._canvas_to_funnel((event.x, event.y)))
 
     def switch_grid(self, grid_on):
+        """Add or remove the grid according to the state of grid_on"""
         self._grid_on = grid_on
         self.redraw()

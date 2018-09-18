@@ -4,9 +4,8 @@ Builds the main window menu bar and associated keyboard shortcuts
 Manages root functions: load program config, load file, save file.
 """
 import tkinter as tk
-from tkinter import filedialog, messagebox, Text
+from tkinter import filedialog, Text
 from tkinter import ttk
-import sys
 import logging
 import logging.handlers
 import pathlib
@@ -23,7 +22,7 @@ log_filename = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("log.t
 details = logging.getLogger("Details")
 details.setLevel(logging.DEBUG)
 file_handler = logging.handlers.RotatingFileHandler(
-              log_filename, maxBytes=500*1000, backupCount=5)
+    log_filename, maxBytes=500*1000, backupCount=5)
 details.addHandler(file_handler)
 
 
@@ -53,12 +52,12 @@ class MainWindow(tk.Tk):
         self.command_stack = CommandStack()
 
         logging_frame = tk.Frame(self)
-        logging_scroll = tk.Scrollbar(logging_frame)
-        logging_scroll.grid(row=0, column=1, sticky=tk.N+tk.S)
-        logging_text = Text(logging_frame, height=6, wrap=tk.WORD, yscrollcommand=logging_scroll.set)
-        logging_text.grid(row=0,column=0, sticky=tk.W+tk.E)
+        log_scroll = tk.Scrollbar(logging_frame)
+        log_scroll.grid(row=0, column=1, sticky=tk.N+tk.S)
+        logging_text = Text(logging_frame, height=6, wrap=tk.WORD, yscrollcommand=log_scroll.set)
+        logging_text.grid(row=0, column=0, sticky=tk.W+tk.E)
         logging_frame.grid_columnconfigure(0, weight=1)
-        logging_scroll.config(command=logging_text.yview)
+        log_scroll.config(command=logging_text.yview)
 
         summary.addHandler(LogToWidget(logging_text))
 
@@ -137,7 +136,8 @@ class MainWindow(tk.Tk):
             with open(path) as file:
                 self.current_ship_data = sd.ShipData(file, self.parameters)
         except sd.ShipFileInvalidException as error:
-            details.error("The file is not correctly formatted to be a ship file!\n%s\n%s", path, error)
+            details.error("The file is not correctly formatted to be a ship file!\n%s\n%s",
+                          path, error)
             summary.error("The file is not correctly formatted to be a ship file!")
             return
 
@@ -218,7 +218,8 @@ class ShipEditor(tk.Frame):
             st_editors.append(new_st_display)
         struct_frame.grid(row=_STRUCT_EDITORS_ROW, column=0, columnspan=2)
 
-        self._top_view = topview.TopView(self, ship_data, st_editors, funnels_editors, command_stack, parameters)
+        self._top_view = topview.TopView(self, ship_data, st_editors,
+                                         funnels_editors, command_stack, parameters)
         self._top_view.grid(row=_TOPVIEW_ROW, column=_TOPVIEW_COL, sticky=tk.W)
 
         st_editors[0]._on_get_focus()
@@ -227,7 +228,8 @@ class ShipEditor(tk.Frame):
         self._side_view.grid(row=_SIDEVIEW_ROW, column=_SIDEVIEW_COL, sticky=tk.W)
 
         self._grid_var = tk.IntVar()
-        ttk.Checkbutton(self, text="Grid", variable=self._grid_var, command=self._switch_grid).grid(row=_SIDEVIEW_ROW, column=0)
+        (ttk.Checkbutton(self, text="Grid", variable=self._grid_var, command=self._switch_grid).
+         grid(row=_SIDEVIEW_ROW, column=0))
 
     def _switch_grid(self):
         self._side_view.fuckit()
@@ -235,13 +237,17 @@ class ShipEditor(tk.Frame):
 
 
 class LogToWidget(logging.Handler):
+    """Redirect the logger's output to a ttk text Widget
+
+    With colors according to debug/info/warning/critical
+    """
     def __init__(self, text_widget):
         super().__init__()
         self._text_widget = text_widget
         self._text_widget.tag_config("Debug")
-        self._text_widget.tag_config("Info", background = "spring green")
-        self._text_widget.tag_config("Warning", background = "orange")
-        self._text_widget.tag_config("Error", background = "red")
+        self._text_widget.tag_config("Info", background="spring green")
+        self._text_widget.tag_config("Warning", background="orange")
+        self._text_widget.tag_config("Error", background="red")
 
     def emit(self, record):
         if record.levelno == logging.DEBUG:

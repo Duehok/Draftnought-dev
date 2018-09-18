@@ -5,7 +5,7 @@ from PIL import Image, ImageTk, ImageDraw
 
 _WIDTH = 701
 _GRID_STEPS = 25
-_GRID_RGBA = (0,0,0,125)
+_GRID_RGBA = (0, 0, 0, 125)
 
 class SideView(tk.Frame):
     """Display the side view picture if one is defined in the ship data
@@ -33,7 +33,7 @@ class SideView(tk.Frame):
 
             self._grid_on = False
             self._grid = make_grid(_WIDTH, self._image.height())
-            self._grid_ID = -1
+            self._grid_id = -1
 
             self._canvas.bind("<MouseWheel>", self._on_mousewheel)
 
@@ -50,7 +50,7 @@ class SideView(tk.Frame):
         self.switch_grid(self._grid_on)
 
     def _on_mousewheel(self, event):
-        if event.delta >0:
+        if event.delta > 0:
             self._ratio = self._ratio*1.05
         else:
             self._ratio = self._ratio*0.95
@@ -60,25 +60,35 @@ class SideView(tk.Frame):
         self._pict_id = self._canvas.create_image((0, 0), image=self._image, anchor=tk.NW)
         self.switch_grid(self._grid_on)
 
-    def fuckit(self):
-        pass
-
     def switch_grid(self, grid_on):
+        """Display or hide the grid according to grid_on"""
         self._grid_on = grid_on
-        if self._grid_ID != -1:
-            self._canvas.delete(self._grid_ID)
+        if self._grid_id != -1:
+            self._canvas.delete(self._grid_id)
         if grid_on:
-            self._grid_ID = self._canvas.create_image((self._canvas.canvasx(0),self._canvas.canvasy(0)), image=self._grid, anchor = tk.NW)
+            self._grid_id = self._canvas.create_image((self._canvas.canvasx(0),
+                                                       self._canvas.canvasy(0)),
+                                                      image=self._grid, anchor=tk.NW)
 
 def make_grid(width, height, horizontal=False):
-    grid = Image.new("RGBA", (width, height), (0,0,0,0))
+    """Build a semi-transparent grid in a picture
+
+    Args:
+        width (int): width of final image
+        height (int): height of final image
+        horizontal (bool): if true, the grid has horizontal and vertical lines
+            if false, vertical only
+    """
+    grid = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(grid)
-    for x in range(0, width, _GRID_STEPS):
-        draw.line( [(x, 0), (x, height)] , width=1, fill=_GRID_RGBA)
+    for x_coord in range(0, width, _GRID_STEPS):
+        draw.line([(x_coord, 0), (x_coord, height)], width=1, fill=_GRID_RGBA)
 
     if horizontal:
-        draw.line( [(0, height/2+1), (width, height/2+1)] , width=1, fill=_GRID_RGBA)
-        for delta_y in range(_GRID_STEPS,int(height/2), _GRID_STEPS):
-            draw.line( [(0, delta_y+ int(height/2)+1), (width, delta_y+ int(height/2)+1)], width=1, fill=_GRID_RGBA)
-            draw.line( [(0, int(height/2)+1- delta_y), (width, int(height/2)+1- delta_y)], width=1, fill=_GRID_RGBA)
+        draw.line([(0, height/2+1), (width, height/2+1)], width=1, fill=_GRID_RGBA)
+        for delta_y in range(_GRID_STEPS, int(height/2), _GRID_STEPS):
+            draw.line([(0, delta_y+ int(height/2)+1), (width, delta_y+ int(height/2)+1)],
+                      width=1, fill=_GRID_RGBA)
+            draw.line([(0, int(height/2)+1- delta_y), (width, int(height/2)+1- delta_y)],
+                      width=1, fill=_GRID_RGBA)
     return ImageTk.PhotoImage(grid)

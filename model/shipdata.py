@@ -154,7 +154,8 @@ class Turret:
                 rel_position = parameters.turrets_positions[pos]["positions"][1]
 
         elif pos == "Y":
-            if (("X" in all_turrs and "W" in all_turrs.keys()) or ("V" in all_turrs and "W"in all_turrs)):
+            if (("X" in all_turrs and "W" in all_turrs.keys()) or
+                    ("V" in all_turrs and "W"in all_turrs)):
                 rel_position = parameters.turrets_positions[pos]["positions"][3]
             elif ("V" in all_turrs or "W" in all_turrs or
                   ({"A", "B", "C"}.issubset(all_turrs)) or

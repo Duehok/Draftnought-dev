@@ -2,30 +2,18 @@
 
 Contains default path for those files
 files in json format
-#TODO:reduce copy pasta
 """
 import json
-import jsonschema
 import logging
-from collections import OrderedDict
 import pathlib
+import jsonschema
 import appdirs
 import schemas
 
 summary = logging.getLogger("Summary")
 details = logging.getLogger("Details")
 
-
 APP_CONFIG = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
-
-#TODO: simplify list of files
-DEFAULT_FILES = {
-    "hulls_shapes" : "hull_shapes.json",
-    "ships_hlengths" : "lengths.json",
-    "turrets_positions": "turrets_positions.json",
-    "turrets_scale":"turrets_scale.json",
-    "turrets_outlines":"turrets_outlines.json",
-    }
 
 DEFAULT_APP_CONFIG = {
     "last_file_path" : "",
@@ -33,23 +21,38 @@ DEFAULT_APP_CONFIG = {
     }
 
 def read_json(path, json_schema, default_data):
+    """Read a json file and validate it against a schema
+
+    If an exception occurs, the default data is returned
+    Args:
+        path (string): path to json file
+        json_schema (dict) a dict with the json schema info
+        default_data (dict): what should be returned in case of failure
+    returns:
+        a dict with the json data if everything works fine, default_data if not
+    """
     try:
         summary.debug("loading parameter file %s", pathlib.Path(path).name)
         with open(path) as file:
             json_data = json.load(file)
     except OSError as error:
-        summary.warning("Could not load file: %s\nLoading default values instead", pathlib.Path(path).resolve())
-        details.warning("Could not load file: %s\n%s", pathlib.Path(path).resolve(), error)
+        summary.warning("Could not load file: %s\nLoading default values instead",
+                        pathlib.Path(path).resolve())
+        details.warning("Could not load file: %s\n%s",
+                        pathlib.Path(path).resolve(), error)
         return default_data
     except json.JSONDecodeError as error:
-        summary.warning("This file is not valid json: %s\nLoading default values instead", pathlib.Path(path).resolve())
-        details.warning("This file is not valid json: %s\n%s\n\nLoading default values instead", pathlib.Path(path).resolve(), error)
+        summary.warning("This file is not valid json: %s\nLoading default values instead",
+                        pathlib.Path(path).resolve())
+        details.warning("This file is not valid json: %s\n%s\n\nLoading default values instead",
+                        pathlib.Path(path).resolve(), error)
         return default_data
 
     try:
         jsonschema.validate(json_data, json_schema)
     except jsonschema.ValidationError as error:
-        summary.warning("Valid JSON but invalid Schema in: %s\nLoading default values instead", path)
+        summary.warning("Valid JSON but invalid Schema in: %s\nLoading default values instead",
+                        path)
         details.warning("Valid JSON but invalid Schema in: %s\n%s", path, error)
         return default_data
 
@@ -67,10 +70,12 @@ def read_app_param():
         with open(APP_CONFIG) as file:
             param = json.load(file)
     except OSError as error:
-        summary.warning("Could not load file: %s\n%s\nDefault values used", APP_CONFIG.resolve(), error)
+        summary.warning("Could not load file: %s\n%s\nDefault values used",
+                        APP_CONFIG.resolve(), error)
         return DEFAULT_APP_CONFIG
     except json.JSONDecodeError as error:
-        summary.warning("Could not decode file: %s\n%s\nDefault values used", APP_CONFIG.resolve(), error)
+        summary.warning("Could not decode file: %s\n%s\nDefault values used",
+                        APP_CONFIG.resolve(), error)
         return DEFAULT_APP_CONFIG
 
     for config, value in DEFAULT_APP_CONFIG.items():
@@ -94,11 +99,21 @@ class Parameters:
     def __init__(self):
 
         self.app_config = read_app_param()
-        self.hulls_shapes = read_json("hull_shapes.json", schemas.HULLS_SHAPES_SCHEMA, schemas.DEFAULT_HULLS_SHAPES)
-        self.turrets_positions = read_json("turrets_positions.json", schemas.TURRETS_POSITION_SCHEMA, schemas.DEFAULT_TURRETS_POSITION)
-        self.turrets_scale = read_json("turrets_scale.json", schemas.TURRETS_SCALE_SCHEMA, schemas.DEFAULT_TURRETS_SCALE)
-        self.turrets_outlines = read_json("turrets_outlines.json", schemas.TURRETS_OUTLINE_SCHEMA, schemas.DEFAULT_TURRETS_OUTLINE)
-        raw_hlengths = read_json("lengths.json", schemas.HALF_LENGTHS_SCHEMA, schemas.DEFAULT_HALF_LENGTHS)
+        self.hulls_shapes = read_json("hull_shapes.json",
+                                      schemas.HULLS_SHAPES_SCHEMA,
+                                      schemas.DEFAULT_HULLS_SHAPES)
+        self.turrets_positions = read_json("turrets_positions.json",
+                                           schemas.TURRETS_POSITION_SCHEMA,
+                                           schemas.DEFAULT_TURRETS_POSITION)
+        self.turrets_scale = read_json("turrets_scale.json",
+                                       schemas.TURRETS_SCALE_SCHEMA,
+                                       schemas.DEFAULT_TURRETS_SCALE)
+        self.turrets_outlines = read_json("turrets_outlines.json",
+                                          schemas.TURRETS_OUTLINE_SCHEMA,
+                                          schemas.DEFAULT_TURRETS_OUTLINE)
+        raw_hlengths = read_json("lengths.json",
+                                 schemas.HALF_LENGTHS_SCHEMA,
+                                 schemas.DEFAULT_HALF_LENGTHS)
 
         self.ships_hlengths = {}
         for ship_type, lengths_dicts in raw_hlengths.items():
