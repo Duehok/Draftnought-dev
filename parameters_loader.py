@@ -13,6 +13,8 @@ import schemas
 summary = logging.getLogger("Summary")
 details = logging.getLogger("Details")
 
+DEFAULT_ZOOM = 1.2571630183484306
+DEFAULT_OFFSET = (-48.0, -34.0)
 RECENT_FILES = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
 
 def read_json(path, json_schema, default_data):
@@ -94,8 +96,8 @@ class Parameters:
             self.zoom = self._recent_files[self._current_file_path]["zoom"]
             self.offset = self._recent_files[self._current_file_path]["offset"]
         else:
-            self.zoom = 1.0
-            self.offset = (0, 0)
+            self.zoom = DEFAULT_ZOOM
+            self.offset = DEFAULT_OFFSET
 
     def write_app_param(self, path=None):
         """write the application config to a file
