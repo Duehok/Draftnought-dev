@@ -232,7 +232,7 @@ class ShipEditor(tk.Frame):
          grid(row=_SIDEVIEW_ROW, column=0))
 
     def _switch_grid(self):
-        self._side_view.fuckit()
+        self._side_view.switch_grid(bool(self._grid_var.get()))
         self._top_view.switch_grid(bool(self._grid_var.get()))
 
 
