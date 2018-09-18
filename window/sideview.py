@@ -19,23 +19,23 @@ class SideView(tk.Frame):
     """
     def __init__(self, parent, ship_data):
         super().__init__(parent)
-        if ship_data.side_pict is not None:
-            self._ship_data = ship_data
-            self._image = ImageTk.PhotoImage(ship_data.side_pict)
-            self._ratio = 1.0
-            self._canvas = tk.Canvas(self, width=_WIDTH, height=self._image.height())
-            self._pict_id = self._canvas.create_image((0, 0), image=self._image, anchor=tk.NW)
-            self._canvas.grid()
-            self._canvas.bind("<Motion>", self._on_move)
-            self._canvas.bind("<ButtonPress-1>", self._on_click)
-            self._canvas.bind("<ButtonRelease-1>", self._on_unclick)
-            self._left_button_down = False
+        self._ship_data = ship_data
+        self._image = ImageTk.PhotoImage(ship_data.side_pict)
+        self._ratio = 1.0
+        self._canvas = tk.Canvas(self, width=_WIDTH, height=self._image.height())
 
-            self._grid_on = False
-            self._grid = make_grid(_WIDTH, self._image.height())
-            self._grid_id = -1
+        self._pict_id = self._canvas.create_image((0, 0), image=self._image, anchor=tk.NW)
+        self._canvas.grid()
+        self._canvas.bind("<Motion>", self._on_move)
+        self._canvas.bind("<ButtonPress-1>", self._on_click)
+        self._canvas.bind("<ButtonRelease-1>", self._on_unclick)
+        self._left_button_down = False
 
-            self._canvas.bind("<MouseWheel>", self._on_mousewheel)
+        self._grid_on = False
+        self._grid = make_grid(self._canvas.winfo_reqwidth(), self._canvas.winfo_reqheight())
+        self._grid_id = -1
+
+        self._canvas.bind("<MouseWheel>", self._on_mousewheel)
 
     def _on_click(self, event):
         self._left_button_down = True

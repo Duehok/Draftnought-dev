@@ -57,7 +57,7 @@ class TopView(tk.Canvas):
 
         self._turrets = ship_data.turrets
 
-        self._grid = make_grid(_WIDTH, _HEIGHT, horizontal=True)
+        self._grid = make_grid(self.winfo_reqwidth(), self.winfo_reqheight(), horizontal=True)
         self._grid_on = False
 
         self.redraw()
