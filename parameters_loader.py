@@ -15,10 +15,6 @@ details = logging.getLogger("Details")
 
 APP_CONFIG = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
 
-DEFAULT_APP_CONFIG = {
-    "last_file_path" : "",
-    }
-
 def read_json(path, json_schema, default_data):
     """Read a json file and validate it against a schema
 
@@ -57,32 +53,6 @@ def read_json(path, json_schema, default_data):
 
     return json_data
 
-def read_app_param():
-    """build the data for the program config
-
-    If the config file is not found, default values are used and an info-level message is logged
-
-    Returns (dict):
-        a dict with all the data
-    """
-    try:
-        with open(APP_CONFIG) as file:
-            param = json.load(file)
-    except OSError as error:
-        summary.warning("Could not load file: %s\n%s\nDefault values used",
-                        APP_CONFIG.resolve(), error)
-        return DEFAULT_APP_CONFIG
-    except json.JSONDecodeError as error:
-        summary.warning("Could not decode file: %s\n%s\nDefault values used",
-                        APP_CONFIG.resolve(), error)
-        return DEFAULT_APP_CONFIG
-
-    for config, value in DEFAULT_APP_CONFIG.items():
-        if config not in param.keys():
-            param[config] = value
-            summary.error("Missing definition %s from file %s", config, APP_CONFIG.resolve())
-    return param
-
 class Parameters:
     """Main class that contains all the parameters
 
@@ -95,9 +65,10 @@ class Parameters:
             the value is the distance from origin to bow in funnel coordinates.
         app_config (dict): program configuration
     """
-    def __init__(self):
-
-        self._app_config = read_app_param()
+    def __init__(self, ship_file_path):
+        self._app_config = read_json(APP_CONFIG,
+                                     schemas.RECENT_FILES_SCHEMA,
+                                     schemas.DEFAULT_RECENT_FILES)
         self.hulls_shapes = read_json("hull_shapes.json",
                                       schemas.HULLS_SHAPES_SCHEMA,
                                       schemas.DEFAULT_HULLS_SHAPES)
@@ -118,7 +89,15 @@ class Parameters:
         for ship_type, lengths_dicts in raw_hlengths.items():
             self.ships_hlengths[ship_type] = convert_str_key_to_int(lengths_dicts)
 
-    def write_app_param(self, new_parameters=None, file_path=None):
+        self._current_file_path = ship_file_path
+        if (self._current_file_path in self._app_config.keys()):
+            self.zoom = self._app_config[self._current_file_path]["zoom"]
+            self.offset = self._app_config[self._current_file_path]["offset"]
+        else:
+            self.zoom = 1.0
+            self.offset = (0, 0)
+
+    def write_app_param(self, path=None):
         """write the application config to a file
 
         Args:
@@ -127,27 +106,36 @@ class Parameters:
             file_path (str): path to the file that should be created or overwritten.
                 If not given, the default file path is used.
         """
-        if file_path is None:
-            file_path = APP_CONFIG.resolve()
-        if new_parameters is None:
-            new_parameters = self._app_config
+        if path is not None:
+            self._current_file_path = path
+        if self._current_file_path in self._app_config.keys():
+            self._app_config[self._current_file_path]["zoom"] = self.zoom
+            self._app_config[self._current_file_path]["offset"] = self.offset
+        elif pathlib.Path(self._current_file_path).exists():
+            self._app_config[self._current_file_path] = {}
+            self._app_config[self._current_file_path]["zoom"] = self.zoom
+            self._app_config[self._current_file_path]["offset"] = self.offset
+            
         try:
-            details.info("Saving app parameters to %s", file_path)
-            pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
-            with open(file_path, "w") as file:
-                json.dump(new_parameters, file)
-                details.info("Saved app parameters to %s", file_path)
+            details.info("Saving app parameters to %s", APP_CONFIG)
+            pathlib.Path(APP_CONFIG).parent.mkdir(parents=True, exist_ok=True)
+            with open(APP_CONFIG, "w") as file:
+                json.dump(self._app_config, file)
+                details.info("Saved app parameters to %s", APP_CONFIG)
         except OSError as error:
-            summary.warning("Could not save app config file to: %s", file_path)
-            details.warning("Could not save app config file to: %s\n%s", file_path, error)
+            summary.warning("Could not save app config file to: %s", APP_CONFIG)
+            details.warning("Could not save app config file to: %s\n%s", APP_CONFIG, error)
 
     @property 
     def last_file_path(self):
-        return self._app_config["last_file_path"]
+        if self._app_config:
+            return list(self._app_config.keys())[-1]
+        else:
+            return ""
 
-    @last_file_path.setter
-    def last_file_path(self, value):
-        self._app_config["last_file_path"] = value
+    @property
+    def current_file_path(self):
+        return self._current_file_path
 
 def convert_str_key_to_int(data):
     """in a dictionary, convert to int the keys (assumed to be an int) that can be parsed to int

@@ -85,7 +85,7 @@ class MainWindow(tk.Tk):
         self.bind("<Control-z>", self.do_undo)
         self.bind("<Control-y>", self.do_redo)
 
-        self.parameters = parameters_loader.Parameters()
+        self.parameters = parameters_loader.Parameters("")
 
         self.center_frame = ttk.Button(self, text="Load ship file", command=self.do_load)
         self.center_frame.grid(row=_MAIN_ROW)
@@ -122,7 +122,7 @@ class MainWindow(tk.Tk):
     def do_save(self, *_args):
         """Save the current file to the same path
         """
-        self.do_save_as(self.parameters.last_file_path)
+        self.do_save_as(self.parameters.current_file_path)
 
     def load(self, path):
         """load a ship file and display it
@@ -132,7 +132,7 @@ class MainWindow(tk.Tk):
                 If none is given, a dialog box is opened to choose it.
         """
         summary.debug("loading %s", path)
-        self.parameters = parameters_loader.Parameters()
+        self.parameters = parameters_loader.Parameters(path)
         try:
             with open(path) as file:
                 self.current_ship_data = sd.ShipData(file, self.parameters)
@@ -141,8 +141,6 @@ class MainWindow(tk.Tk):
                           path, error)
             summary.error("The file is not correctly formatted to be a ship file!")
             return
-
-        self.parameters.last_file_path= path
 
         summary.info("loading successful!")
         self.center_frame.destroy()
@@ -173,9 +171,8 @@ class MainWindow(tk.Tk):
             if file is not None:
                 summary.debug("saving file to %s", file.name)
                 self.current_ship_data.write_as_ini(file_object=file)
-                self.parameters.last_file_path = file.name
                 file.close()
-                self.parameters.write_app_param()
+                self.parameters.write_app_param(file.name)
         else:
             summary.debug("saving file to %s", path)
             try:
@@ -187,8 +184,7 @@ class MainWindow(tk.Tk):
                 return
 
             summary.info("save successful!")
-            self.parameters.last_file_path = path
-            self.parameters.write_app_param()
+            self.parameters.write_app_param(file.name)
 
 class ShipEditor(tk.Frame):
     """class for the display of the whole editor
