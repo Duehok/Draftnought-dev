@@ -90,7 +90,7 @@ class Parameters:
             self.ships_hlengths[ship_type] = convert_str_key_to_int(lengths_dicts)
 
         self._current_file_path = ship_file_path
-        if (self._current_file_path in self._recent_files.keys()):
+        if self._current_file_path in self._recent_files.keys():
             self.zoom = self._recent_files[self._current_file_path]["zoom"]
             self.offset = self._recent_files[self._current_file_path]["offset"]
         else:
@@ -114,7 +114,7 @@ class Parameters:
             self._recent_files[self._current_file_path] = {}
             self._recent_files[self._current_file_path]["zoom"] = self.zoom
             self._recent_files[self._current_file_path]["offset"] = self.offset
-            
+
         try:
             details.info("Saving app parameters to %s", RECENT_FILES)
             pathlib.Path(RECENT_FILES).parent.mkdir(parents=True, exist_ok=True)
@@ -125,7 +125,7 @@ class Parameters:
             summary.warning("Could not save app config file to: %s", RECENT_FILES)
             details.warning("Could not save app config file to: %s\n%s", RECENT_FILES, error)
 
-    @property 
+    @property
     def last_file_path(self):
         if self._recent_files:
             return list(self._recent_files.keys())[-1]
