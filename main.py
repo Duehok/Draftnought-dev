@@ -132,6 +132,7 @@ class MainWindow(tk.Tk):
                 If none is given, a dialog box is opened to choose it.
         """
         summary.debug("loading %s", path)
+        self.parameters = parameters_loader.Parameters()
         try:
             with open(path) as file:
                 self.current_ship_data = sd.ShipData(file, self.parameters)
