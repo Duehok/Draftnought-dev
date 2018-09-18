@@ -165,7 +165,7 @@ class Turret:
                 rel_position = parameters.turrets_positions[pos]["positions"][1]
 
         position = (rel_position[0]*ship_hlength, rel_position[1]*ship_hlength)
-        raw_outline = parameters.turrets_outlines[guns-1]
+        raw_outline = parameters.turrets_outlines[guns]
         #rotate if the turret should be backward
         if not to_bow:
             rotated_outline = [(point[0], -point[1]) for point in raw_outline]

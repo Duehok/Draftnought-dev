@@ -50,7 +50,8 @@ class SideView(tk.Frame):
         if self._left_button_down:
             self._canvas.scan_dragto(event.x, event.y, gain=1)
             pict_ccord = self._canvas.coords(self._image_id)
-            self._parameters.offset = (-self._canvas.canvasx(-pict_ccord[0]), -self._canvas.canvasy(-pict_ccord[1]))
+            self._parameters.offset = (-self._canvas.canvasx(-pict_ccord[0]),
+                                       -self._canvas.canvasy(-pict_ccord[1]))
             self.switch_grid(self._grid_on)
 
     def _on_mousewheel(self, event):
@@ -61,7 +62,6 @@ class SideView(tk.Frame):
         self._re_zoom(self._parameters.zoom)
 
     def _re_zoom(self, new_zoom):
-        
         offset = self._canvas.coords(self._image_id)
         self._canvas.delete(self._image_id)
         new_size = [round(coord*new_zoom) for coord in self._ship_data.side_pict.size]
