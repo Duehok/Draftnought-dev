@@ -13,7 +13,7 @@ import schemas
 summary = logging.getLogger("Summary")
 details = logging.getLogger("Details")
 
-APP_CONFIG = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
+RECENT_FILES = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
 
 def read_json(path, json_schema, default_data):
     """Read a json file and validate it against a schema
@@ -66,7 +66,7 @@ class Parameters:
         app_config (dict): program configuration
     """
     def __init__(self, ship_file_path):
-        self._app_config = read_json(APP_CONFIG,
+        self._recent_files = read_json(RECENT_FILES,
                                      schemas.RECENT_FILES_SCHEMA,
                                      schemas.DEFAULT_RECENT_FILES)
         self.hulls_shapes = read_json("hull_shapes.json",
@@ -90,9 +90,9 @@ class Parameters:
             self.ships_hlengths[ship_type] = convert_str_key_to_int(lengths_dicts)
 
         self._current_file_path = ship_file_path
-        if (self._current_file_path in self._app_config.keys()):
-            self.zoom = self._app_config[self._current_file_path]["zoom"]
-            self.offset = self._app_config[self._current_file_path]["offset"]
+        if (self._current_file_path in self._recent_files.keys()):
+            self.zoom = self._recent_files[self._current_file_path]["zoom"]
+            self.offset = self._recent_files[self._current_file_path]["offset"]
         else:
             self.zoom = 1.0
             self.offset = (0, 0)
@@ -108,28 +108,27 @@ class Parameters:
         """
         if path is not None:
             self._current_file_path = path
-        if self._current_file_path in self._app_config.keys():
-            self._app_config[self._current_file_path]["zoom"] = self.zoom
-            self._app_config[self._current_file_path]["offset"] = self.offset
-        elif pathlib.Path(self._current_file_path).exists():
-            self._app_config[self._current_file_path] = {}
-            self._app_config[self._current_file_path]["zoom"] = self.zoom
-            self._app_config[self._current_file_path]["offset"] = self.offset
+        if self._current_file_path in self._recent_files.keys():
+            del self._recent_files[self._current_file_path]
+        if pathlib.Path(self._current_file_path).exists():
+            self._recent_files[self._current_file_path] = {}
+            self._recent_files[self._current_file_path]["zoom"] = self.zoom
+            self._recent_files[self._current_file_path]["offset"] = self.offset
             
         try:
-            details.info("Saving app parameters to %s", APP_CONFIG)
-            pathlib.Path(APP_CONFIG).parent.mkdir(parents=True, exist_ok=True)
-            with open(APP_CONFIG, "w") as file:
-                json.dump(self._app_config, file)
-                details.info("Saved app parameters to %s", APP_CONFIG)
+            details.info("Saving app parameters to %s", RECENT_FILES)
+            pathlib.Path(RECENT_FILES).parent.mkdir(parents=True, exist_ok=True)
+            with open(RECENT_FILES, "w") as file:
+                json.dump(self._recent_files, file)
+                details.info("Saved app parameters to %s", RECENT_FILES)
         except OSError as error:
-            summary.warning("Could not save app config file to: %s", APP_CONFIG)
-            details.warning("Could not save app config file to: %s\n%s", APP_CONFIG, error)
+            summary.warning("Could not save app config file to: %s", RECENT_FILES)
+            details.warning("Could not save app config file to: %s\n%s", RECENT_FILES, error)
 
     @property 
     def last_file_path(self):
-        if self._app_config:
-            return list(self._app_config.keys())[-1]
+        if self._recent_files:
+            return list(self._recent_files.keys())[-1]
         else:
             return ""
 

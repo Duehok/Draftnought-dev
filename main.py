@@ -221,7 +221,7 @@ class ShipEditor(tk.Frame):
 
         st_editors[0]._on_get_focus()
 
-        self._side_view = sideview.SideView(self, ship_data)
+        self._side_view = sideview.SideView(self, ship_data, parameters)
         self._side_view.grid(row=_SIDEVIEW_ROW, column=_SIDEVIEW_COL, sticky=tk.W)
 
         self._grid_var = tk.IntVar()
