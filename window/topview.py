@@ -202,7 +202,7 @@ class TopView(tk.Canvas):
 
     def _draw_turret(self, turret):
         canvas_outline = [self._funnel_to_canvas(point) for point in turret.outline]
-        return [self.create_polygon(*canvas_outline, fill="green")]
+        return [self.create_polygon(*canvas_outline, fill="green", outline="black")]
 
     def redraw(self, active_editor=None):
         """Redraw all the canvas elements, except the hul outline

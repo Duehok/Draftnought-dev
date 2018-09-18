@@ -91,7 +91,7 @@ class MainWindow(tk.Tk):
         self.center_frame.grid(row=_MAIN_ROW)
 
         try:
-            with open(self.parameters.app_config["last_file_path"]) as file:
+            with open(self.parameters.last_file_path) as file:
                 self.load(file.name)
         except OSError:
             return
@@ -122,7 +122,7 @@ class MainWindow(tk.Tk):
     def do_save(self, *_args):
         """Save the current file to the same path
         """
-        self.do_save_as(self.parameters.app_config["last_file_path"])
+        self.do_save_as(self.parameters.last_file_path)
 
     def load(self, path):
         """load a ship file and display it
@@ -142,7 +142,7 @@ class MainWindow(tk.Tk):
             summary.error("The file is not correctly formatted to be a ship file!")
             return
 
-        self.parameters.app_config["last_file_path"] = path
+        self.parameters.last_file_path= path
 
         summary.info("loading successful!")
         self.center_frame.destroy()
@@ -173,7 +173,7 @@ class MainWindow(tk.Tk):
             if file is not None:
                 summary.debug("saving file to %s", file.name)
                 self.current_ship_data.write_as_ini(file_object=file)
-                self.parameters.app_config["last_file_path"] = file.name
+                self.parameters.last_file_path = file.name
                 file.close()
                 self.parameters.write_app_param()
         else:
@@ -187,7 +187,7 @@ class MainWindow(tk.Tk):
                 return
 
             summary.info("save successful!")
-            self.parameters.app_config["last_file_path"] = path
+            self.parameters.last_file_path = path
             self.parameters.write_app_param()
 
 class ShipEditor(tk.Frame):

@@ -17,7 +17,6 @@ APP_CONFIG = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_con
 
 DEFAULT_APP_CONFIG = {
     "last_file_path" : "",
-    "max_points_in_structure":21
     }
 
 def read_json(path, json_schema, default_data):
@@ -32,7 +31,7 @@ def read_json(path, json_schema, default_data):
         a dict with the json data if everything works fine, default_data if not
     """
     try:
-        summary.debug("loading parameter file %s", pathlib.Path(path).name)
+        details.debug("loading parameter file %s", pathlib.Path(path).name)
         with open(path) as file:
             json_data = json.load(file)
     except OSError as error:
@@ -98,7 +97,7 @@ class Parameters:
     """
     def __init__(self):
 
-        self.app_config = read_app_param()
+        self._app_config = read_app_param()
         self.hulls_shapes = read_json("hull_shapes.json",
                                       schemas.HULLS_SHAPES_SCHEMA,
                                       schemas.DEFAULT_HULLS_SHAPES)
@@ -131,7 +130,7 @@ class Parameters:
         if file_path is None:
             file_path = APP_CONFIG.resolve()
         if new_parameters is None:
-            new_parameters = self.app_config
+            new_parameters = self._app_config
         try:
             details.info("Saving app parameters to %s", file_path)
             pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
@@ -141,6 +140,14 @@ class Parameters:
         except OSError as error:
             summary.warning("Could not save app config file to: %s", file_path)
             details.warning("Could not save app config file to: %s\n%s", file_path, error)
+
+    @property 
+    def last_file_path(self):
+        return self._app_config["last_file_path"]
+
+    @last_file_path.setter
+    def last_file_path(self, value):
+        self._app_config["last_file_path"] = value
 
 def convert_str_key_to_int(data):
     """in a dictionary, convert to int the keys (assumed to be an int) that can be parsed to int
