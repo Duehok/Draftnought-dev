@@ -16,6 +16,7 @@ details = logging.getLogger("Details")
 DEFAULT_ZOOM = 1.2571630183484306
 DEFAULT_OFFSET = (-48.0, -34.0)
 RECENT_FILES = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
+MAX_RECENT_FILES = 21
 
 def read_json(path, json_schema, default_data):
     """Read a json file and validate it against a schema
@@ -116,6 +117,11 @@ class Parameters:
             self._recent_files[self._current_file_path] = {}
             self._recent_files[self._current_file_path]["zoom"] = self.zoom
             self._recent_files[self._current_file_path]["offset"] = self.offset
+        if len(self._recent_files) > MAX_RECENT_FILES:
+            self._recent_files = {f:self._recent_files[f] 
+                                  for f in list(
+                                                self._recent_files.keys())[len(self._recent_files)
+                                                                           -MAX_RECENT_FILES:]}
 
         try:
             details.info("Saving app parameters to %s", RECENT_FILES)
