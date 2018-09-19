@@ -136,7 +136,7 @@ HALF_LENGTHS_SCHEMA = (
 })
 DEFAULT_HALF_LENGTHS = {ship_type:{"2000000":200} for ship_type in SHIP_TYPES}
 
-RECENT_FILES_PATH = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("recent_files.json")
+RECENT_FILES_PATH = pathlib.Path(appdirs.user_data_dir("Draftnought")).joinpath("recent_files.json")
 RECENT_FILES_SCHEMA = (
   {
     "$schema" : "http://json-schema.org/draft-04/schema#",
