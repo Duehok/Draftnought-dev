@@ -37,3 +37,12 @@ start main.py
 
 ## Build:
 run build.bat
+
+## Limitations and TODO list
+- probable presence of bugs in the turret position logic
+- deck torpedo tubes have been... forgotten
+- only one style of turrets, so the turret's outlines will not be exactly what you see in the game
+- secondaries are not shown
+- casemate guns have the same outline as the one gun turrets
+- turrets positions are a bit approximative
+- name, tonnage, year, etc... are not shown
