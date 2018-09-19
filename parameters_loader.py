@@ -13,8 +13,6 @@ import schemas
 summary = logging.getLogger("Summary")
 details = logging.getLogger("Details")
 
-DEFAULT_ZOOM = 1.2571630183484306
-DEFAULT_OFFSET = (-48.0, -40.0)
 RECENT_FILES = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
 MAX_RECENT_FILES = 21
 
@@ -98,16 +96,19 @@ class Parameters:
         #if not, default values
         #Starting python 3.7, dicts are ordered by insert order
         self._current_file_path = ship_file_path
+        self.zoom = self.file_param("zoom")
+        self.offset = self.file_param("offset")
+        self.grid = self.file_param("grid")
+
+    def file_param(self, param):
         if self._current_file_path in self._recent_files.keys():
-            self.zoom = self._recent_files[self._current_file_path]["zoom"]
-            self.offset = self._recent_files[self._current_file_path]["offset"]
-        elif self._recent_files:
+            return self._recent_files[self._current_file_path][param]
+        if self._recent_files:
             last_file = list(self._recent_files.keys())[-1]
-            self.zoom = self._recent_files[last_file]["zoom"]
-            self.offset = self._recent_files[last_file]["offset"]
-        else:
-            self.zoom = DEFAULT_OFFSET
-            self.offset = DEFAULT_ZOOM
+            return self._recent_files[last_file][param]
+        return schemas.DEFAULT_PARAM[param]
+
+
 
     def write_app_param(self, path=None):
         """write the application config to a file

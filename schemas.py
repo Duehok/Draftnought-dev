@@ -139,6 +139,7 @@ RECENT_FILES_SCHEMA = (
       "properties":
       {
         "zoom":{"type":"number"},
+        "grid":{"type":"boolean"},
         "offset":
         {
           "type":"array",
@@ -149,9 +150,15 @@ RECENT_FILES_SCHEMA = (
           "additionalItems": False
         }
       },
-      "additionalProperties": False
+      "additionalProperties": False,
+      "required":["zoom", "grid", "offset"]
     }
   }
 )
 
 DEFAULT_RECENT_FILES ={}
+DEFAULT_PARAM = {
+    "zoom":1.2571630183484306,
+    "offset":(-48, -40),
+    "grid":True
+}
