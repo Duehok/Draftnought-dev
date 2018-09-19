@@ -16,7 +16,7 @@ start main.py
   
   ![after first load](screenshot.png)
   
-### After loading
+#### After loading
   
   Draw all the things! You can pan the side view by holding the moise's left button and dragging and you can zoom this view with the mouse's scroll wheel. A grid to help align structures can be toggled under the Menu => View => Grid.
   
@@ -30,7 +30,7 @@ start main.py
   
   Don't forget to save! The last saved file is automatically loaded on the next start.
 
-## Requirements
+## Requirements to build
   Python>=3.6
   Windows 7+ for the build batch file
   Tested on win 7 and 8.1, nothing else.
