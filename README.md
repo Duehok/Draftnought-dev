@@ -8,12 +8,12 @@ start draftnought.exe
 #### With python:
 start main.py
 
-  https://github.com/Duehok/Draftnought-dev/blob/master/start.png
+  !(start.png)
 
   Use the "load ship file" or the menu option File => Open File, or the shortcut Ctrl-O to open a .<xy>d file.
   They can be found in your game folder, under /Save/Game<x>/
   
-  https://github.com/Duehok/Draftnought-dev/blob/master/screenshot.png
+  !(screenshot.png)
   
   Then draw to your heart content! you can pan the side view by holding the moise's left button and dragging and you can zoom this view with the mouse's scroll wheel. A grid to help align structures can be toggled under the Menu => View => Grid.
   
