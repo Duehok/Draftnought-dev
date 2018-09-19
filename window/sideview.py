@@ -4,6 +4,7 @@ import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw
 
 _WIDTH = 701
+_HEIGHT = 201
 _GRID_STEPS = 25
 _GRID_RGBA = (0, 0, 0, 125)
 
@@ -20,11 +21,15 @@ class SideView(tk.Frame):
     def __init__(self, parent, ship_data, parameters):
         super().__init__(parent)
         self._parameters = parameters
-        self._ship_data = ship_data
-        self._image = ImageTk.PhotoImage(ship_data.side_pict)
-        self._canvas = tk.Canvas(self, width=_WIDTH, height=self._image.height(), cursor="fleur")
+        
+        if ship_data.side_pict:
+            self._image = ship_data.side_pict
+        else:
+            self._image = Image.new(mode="RGBA",size=(1,1),color=(0, 0, 0, 0))
+        self._tkimage = ImageTk.PhotoImage(self._image)
+        self._canvas = tk.Canvas(self, width=_WIDTH, height=self._tkimage.height(), cursor="fleur")
 
-        self._image_id = self._canvas.create_image((0, 0), image=self._image, anchor=tk.NW)
+        self._image_id = self._canvas.create_image((0, 0), image=self._tkimage, anchor=tk.NW)
         self._canvas.grid()
         self._canvas.bind("<Motion>", self._on_move)
         self._canvas.bind("<ButtonPress-1>", self._on_click)
@@ -64,9 +69,9 @@ class SideView(tk.Frame):
     def _re_zoom(self, new_zoom):
         offset = self._canvas.coords(self._image_id)
         self._canvas.delete(self._image_id)
-        new_size = [round(coord*new_zoom) for coord in self._ship_data.side_pict.size]
-        self._image = ImageTk.PhotoImage(self._ship_data.side_pict.resize(new_size))
-        self._image_id = self._canvas.create_image(*offset, image=self._image, anchor=tk.NW)
+        new_size = [round(coord*new_zoom) for coord in  self._image.size]
+        self._tkimage = ImageTk.PhotoImage(self._image.resize(new_size))
+        self._image_id = self._canvas.create_image(*offset, image=self._tkimage, anchor=tk.NW)
         self.switch_grid(self._grid_on)
 
 
