@@ -65,6 +65,8 @@ class MainWindow(tk.Tk):
 
         logging_frame.grid(row=_LOG_ROW, sticky=tk.W+tk.E)
 
+        self.parameters = parameters_loader.Parameters("")
+
         menubar = tk.Menu(self)
         self.config(menu=menubar)
 
@@ -78,16 +80,21 @@ class MainWindow(tk.Tk):
         editmenu.add_command(label='Undo', command=self.do_undo, accelerator="Ctrl+Z")
         editmenu.add_command(label='Redo', command=self.do_redo, accelerator="Ctrl+Y")
 
+        viewmenu = tk.Menu(menubar, tearoff=0)
+        self.grid_var = tk.IntVar()
+        self.grid_var.set(int(self.parameters.grid))
+        self.grid_var.trace_add("write", self._set_grid)
+        viewmenu.add_checkbutton(label="Grid", variable=self.grid_var)
+
         menubar.add_cascade(label='File', menu=filemenu)
         menubar.add_cascade(label='Edit', menu=editmenu)
+        menubar.add_cascade(label='View', menu=viewmenu)
 
         self.bind("<Control-s>", self.do_save)
         self.bind("<Control-o>", self.do_load)
         self.bind("<Control-S>", self.do_save_as_keyboard)
         self.bind("<Control-z>", self.do_undo)
         self.bind("<Control-y>", self.do_redo)
-
-        self.parameters = parameters_loader.Parameters("")
 
         self.center_frame = ttk.Button(self, text="Load ship file", command=self.do_load)
         self.center_frame.grid(row=_MAIN_ROW)
@@ -97,6 +104,11 @@ class MainWindow(tk.Tk):
                 self.load(file.name)
         except OSError:
             return
+
+    def _set_grid(self, _var_name, _list_index, _operation):
+        self.parameters.grid = bool(self.grid_var.get())
+        if isinstance(self.center_frame, ShipEditor):
+            self.center_frame.set_grid(bool(self.grid_var.get()))
 
     def do_undo(self, *_args):
         """undo last command, or deeper in the undoing stack
@@ -156,6 +168,7 @@ class MainWindow(tk.Tk):
         self.center_frame.grid(row=_MAIN_ROW)
         #if load was OK, forget the old command stack
         self.command_stack = new_command_stack
+        self.grid_var.set(int(self.parameters.grid))
         self.winfo_toplevel().title(pathlib.Path(path).name)
 
     def do_save_as(self, path=None):
@@ -222,13 +235,9 @@ class ShipEditor(tk.Frame):
         self._side_view = sideview.SideView(self, ship_data, parameters)
         self._side_view.grid(row=_SIDEVIEW_ROW, columnspan=4)
 
-        self._grid_var = tk.IntVar()
-        grid_button = ttk.Checkbutton(self, text="Grid", variable=self._grid_var, command=self._switch_grid)
-        grid_button.grid(row=_SIDEVIEW_ROW, column=0)
-
-    def _switch_grid(self):
-        self._side_view.switch_grid(bool(self._grid_var.get()))
-        self._top_view.switch_grid(bool(self._grid_var.get()))
+    def set_grid(self, grid_state):
+        self._side_view.switch_grid(grid_state)
+        self._top_view.switch_grid(grid_state)
 
 
 class LogToWidget(logging.Handler):
