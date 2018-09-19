@@ -18,7 +18,7 @@ start main.py
   
 ### After loading
   
-  Draw all the things! you can pan the side view by holding the moise's left button and dragging and you can zoom this view with the mouse's scroll wheel. A grid to help align structures can be toggled under the Menu => View => Grid.
+  Draw all the things! You can pan the side view by holding the moise's left button and dragging and you can zoom this view with the mouse's scroll wheel. A grid to help align structures can be toggled under the Menu => View => Grid.
   
   You can move the vertexes of the superstructures by selecting them in the lists and editing their coordinates or clicking on the top view.
   The funnels can be toggled on/off, oval/round and placed by clicking on the top view or editing their coordinate.
