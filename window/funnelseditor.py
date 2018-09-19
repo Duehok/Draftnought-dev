@@ -29,12 +29,12 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
 
         self._update()
 
-        Checkbutton(self, text=f"Funnel n°{index}:  ", variable=self._active_var).pack(side=tk.LEFT)
-        Label(self, text="  Position: ").pack(side=tk.LEFT)
+        Checkbutton(self, text=f"Funnel n°{index}:  ", variable=self._active_var).grid(columnspan=3)
+        Label(self, text="  Position: ").grid()
         pos_entry = Entry(self, textvariable=self._position_var, width=6)
-        pos_entry.pack(side=tk.LEFT)
+        pos_entry.grid(row=1, column=1)
         pos_entry.bind("<FocusIn>", self._update)
-        Checkbutton(self, text="Is Oval", variable=self._oval_var).pack(side=tk.LEFT)
+        Checkbutton(self, text="Is Oval", variable=self._oval_var).grid(row=1,column=2)
 
     def _on_notification(self, observable, event_type, event_info):
         self._update()

@@ -37,9 +37,9 @@ _TOPVIEW_ROW = _SIDEVIEW_ROW+1
 _SIDEVIEW_COL = 1
 _TOPVIEW_COL = _SIDEVIEW_COL
 
-_FUNNELS_ROW = _TOPVIEW_ROW
+_FUNNELS_ROW = _TOPVIEW_ROW+1
 
-_STRUCT_EDITORS_ROW = _TOPVIEW_ROW+1
+_STRUCT_EDITORS_ROW = _FUNNELS_ROW+1
 
 class MainWindow(tk.Tk):
     """Base class for the whole UI
@@ -201,30 +201,26 @@ class ShipEditor(tk.Frame):
     def __init__(self, parent, ship_data, command_stack, parameters):
         super().__init__(parent)
 
-        funnels_frame = tk.Frame(self)
         funnels_editors = []
         for index, funnel in enumerate(ship_data.funnels.values()):
-            funnel_editor = funnelseditor.FunnelEditor(funnels_frame, funnel, index, command_stack)
-            funnel_editor.pack()
+            funnel_editor = funnelseditor.FunnelEditor(self, funnel, index, command_stack)
+            funnel_editor.grid(row=_FUNNELS_ROW, column=index)
             funnels_editors.append(funnel_editor)
-        funnels_frame.grid(row=_FUNNELS_ROW, column=0, sticky=tk.S)
-        struct_frame = tk.Frame(self)
         index_structure = 0
         st_editors = []
         for index_structure, structure in enumerate(ship_data.structures):
-            new_st_display = structeditor.StructEditor(struct_frame, structure, command_stack)
-            new_st_display.grid(row=0, column=index_structure)
+            new_st_display = structeditor.StructEditor(self, structure, command_stack)
+            new_st_display.grid(row=_STRUCT_EDITORS_ROW, column=index_structure)
             st_editors.append(new_st_display)
-        struct_frame.grid(row=_STRUCT_EDITORS_ROW, column=0, columnspan=2)
 
         self._top_view = topview.TopView(self, ship_data, st_editors,
                                          funnels_editors, command_stack, parameters)
-        self._top_view.grid(row=_TOPVIEW_ROW, column=_TOPVIEW_COL, sticky=tk.W)
+        self._top_view.grid(row=_TOPVIEW_ROW, columnspan=4)
 
         st_editors[0]._on_get_focus()
 
         self._side_view = sideview.SideView(self, ship_data, parameters)
-        self._side_view.grid(row=_SIDEVIEW_ROW, column=_SIDEVIEW_COL, sticky=tk.W)
+        self._side_view.grid(row=_SIDEVIEW_ROW, columnspan=4)
 
         self._grid_var = tk.IntVar()
         (ttk.Checkbutton(self, text="Grid", variable=self._grid_var, command=self._switch_grid).
