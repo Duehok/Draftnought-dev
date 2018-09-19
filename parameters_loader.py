@@ -7,13 +7,11 @@ import json
 import logging
 import pathlib
 import jsonschema
-import appdirs
 import schemas
 
 summary = logging.getLogger("Summary")
 details = logging.getLogger("Details")
 
-RECENT_FILES = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("recent_files.json")
 MAX_RECENT_FILES = 21
 
 def read_json(path, json_schema, default_data):
@@ -67,22 +65,22 @@ class Parameters:
         app_config (dict): program configuration
     """
     def __init__(self, ship_file_path):
-        self._recent_files = read_json(RECENT_FILES,
+        self._recent_files = read_json(schemas.RECENT_FILES_PATH,
                                      schemas.RECENT_FILES_SCHEMA,
                                      schemas.DEFAULT_RECENT_FILES)
-        self.hulls_shapes = read_json("hull_shapes.json",
+        self.hulls_shapes = read_json(schemas.HULLS_SHAPES_PATH,
                                       schemas.HULLS_SHAPES_SCHEMA,
                                       schemas.DEFAULT_HULLS_SHAPES)
-        self.turrets_positions = read_json("turrets_positions.json",
+        self.turrets_positions = read_json(schemas.TURRETS_POSITION_PATH,
                                            schemas.TURRETS_POSITION_SCHEMA,
                                            schemas.DEFAULT_TURRETS_POSITION)
-        self.turrets_scale = read_json("turrets_scale.json",
+        self.turrets_scale = read_json(schemas.TURRETS_SCALE_PATH,
                                        schemas.TURRETS_SCALE_SCHEMA,
                                        schemas.DEFAULT_TURRETS_SCALE)
-        self.turrets_outlines = read_json("turrets_outlines.json",
+        self.turrets_outlines = read_json(schemas.TURRETS_OUTLINES_PATH,
                                           schemas.TURRETS_OUTLINE_SCHEMA,
                                           schemas.DEFAULT_TURRETS_OUTLINE)
-        raw_hlengths = read_json("lengths.json",
+        raw_hlengths = read_json(schemas.HALF_LENGTHS_PATH,
                                  schemas.HALF_LENGTHS_SCHEMA,
                                  schemas.DEFAULT_HALF_LENGTHS)
 
@@ -135,14 +133,14 @@ class Parameters:
                                                                            -MAX_RECENT_FILES:]}
 
         try:
-            details.info("Saving app parameters to %s", RECENT_FILES)
-            pathlib.Path(RECENT_FILES).parent.mkdir(parents=True, exist_ok=True)
-            with open(RECENT_FILES, "w") as file:
+            details.info("Saving app parameters to %s", schemas.RECENT_FILES_PATH)
+            pathlib.Path(schemas.RECENT_FILES_PATH).parent.mkdir(parents=True, exist_ok=True)
+            with open(schemas.RECENT_FILES_PATH, "w") as file:
                 json.dump(self._recent_files, file)
-                details.info("Saved app parameters to %s", RECENT_FILES)
+                details.info("Saved app parameters to %s", schemas.RECENT_FILES_PATH)
         except OSError as error:
-            summary.warning("Could not save app config file to: %s", RECENT_FILES)
-            details.warning("Could not save app config file to: %s\n%s", RECENT_FILES, error)
+            summary.warning("Could not save app config file to: %s", schemas.RECENT_FILES_PATH)
+            details.warning("Could not save app config file to: %s\n%s", schemas.RECENT_FILES_PATH, error)
 
     @property
     def last_file_path(self):
