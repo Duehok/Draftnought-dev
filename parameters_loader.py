@@ -13,7 +13,7 @@ import schemas
 summary = logging.getLogger("Summary")
 details = logging.getLogger("Details")
 
-RECENT_FILES = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("app_config.json")
+RECENT_FILES = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("recent_files.json")
 MAX_RECENT_FILES = 21
 
 def read_json(path, json_schema, default_data):
