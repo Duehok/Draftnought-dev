@@ -127,6 +127,7 @@ class Parameters:
             self._recent_files[self._current_file_path] = {}
             self._recent_files[self._current_file_path]["zoom"] = self.zoom
             self._recent_files[self._current_file_path]["offset"] = self.offset
+            self._recent_files[self._current_file_path]["grid"] = self.grid
         if len(self._recent_files) > MAX_RECENT_FILES:
             self._recent_files = {f:self._recent_files[f] 
                                   for f in list(
