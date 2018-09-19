@@ -46,3 +46,6 @@ run build.bat
 - casemate guns have the same outline as the one gun turrets
 - turrets positions are a bit approximative
 - name, tonnage, year, etc... are not shown
+- recent files should be shown in the menu
+- file extension should be automatically added to the "save as" file dialog
+- there are certainly bugs to find and solve
