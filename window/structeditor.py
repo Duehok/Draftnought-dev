@@ -112,14 +112,16 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         if self._index_of_sel_point != -1 and self._index_of_sel_point <= len(self.points)-1:
             self._command_stack.do(model.structure.UpdatePoint(
                 self._structure, self._index_of_sel_point, point[0], point[1]))
-        elif self._index_of_sel_point == len(self.points):
+        elif self._index_of_sel_point == len(self.points) or not self.points:
             self._command_stack.do(model.structure.AddPoint(self._structure,
                                                             self._index_of_sel_point+1,
                                                             *point))
         if self._index_of_sel_point+1 >= len(self.points):
+            self.winfo_toplevel().update()
             self._index_of_sel_point = len(self.points)
         else:
             self._force_selection(self._index_of_sel_point+1)
+            self.winfo_toplevel().update()
 
     @property
     def points(self):
