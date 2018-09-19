@@ -8,6 +8,7 @@ start draftnought.exe
 #### With python:
 start main.py
 
+#### First start
   ![first start](start.png)
 
   Use the "load ship file" or the menu option File => Open File, or the shortcut Ctrl-O to open a .<xy>d file.
@@ -15,13 +16,15 @@ start main.py
   
   ![after first load](screenshot.png)
   
-  Then draw to your heart content! you can pan the side view by holding the moise's left button and dragging and you can zoom this view with the mouse's scroll wheel. A grid to help align structures can be toggled under the Menu => View => Grid.
+### After loading
+  
+  Draw all the things! you can pan the side view by holding the moise's left button and dragging and you can zoom this view with the mouse's scroll wheel. A grid to help align structures can be toggled under the Menu => View => Grid.
   
   You can move the vertexes of the superstructures by selecting them in the lists and editing their coordinates or clicking on the top view.
   The funnels can be toggled on/off, oval/round and placed by clicking on the top view or editing their coordinate.
   
   The coordinate system is:
-  -origin in the middle of the ship
+  - origin in the middle of the ship
   - first coordinates along the axis bow-stern, increasing toward the stern
   - second coordinates along port-starboard, increasing toward starboard
   
