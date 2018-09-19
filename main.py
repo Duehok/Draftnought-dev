@@ -22,7 +22,7 @@ log_filename = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("log.t
 if not log_filename.exists():
     log_filename.parent.mkdir(parents=True, exist_ok=True)
 details = logging.getLogger("Details")
-details.setLevel(logging.DEBUG)
+details.setLevel(logging.ERROR)
 file_handler = logging.handlers.RotatingFileHandler(
     log_filename, maxBytes=500*1000, backupCount=5)
 details.addHandler(file_handler)
