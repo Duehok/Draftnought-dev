@@ -36,7 +36,7 @@ class TopView(tk.Canvas):
                            width=_WIDTH,
                            height=_HEIGHT,
                            borderwidth=2,
-                           relief="ridge")
+                           relief="ridge", cursor="crosshair")
 
         self.command_stack = command_stack
 

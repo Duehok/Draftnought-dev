@@ -22,7 +22,7 @@ class SideView(tk.Frame):
         self._parameters = parameters
         self._ship_data = ship_data
         self._image = ImageTk.PhotoImage(ship_data.side_pict)
-        self._canvas = tk.Canvas(self, width=_WIDTH, height=self._image.height())
+        self._canvas = tk.Canvas(self, width=_WIDTH, height=self._image.height(), cursor="fleur")
 
         self._image_id = self._canvas.create_image((0, 0), image=self._image, anchor=tk.NW)
         self._canvas.grid()
