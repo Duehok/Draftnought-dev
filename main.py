@@ -204,7 +204,7 @@ class ShipEditor(tk.Frame):
         funnels_editors = []
         for index, funnel in enumerate(ship_data.funnels.values()):
             funnel_editor = funnelseditor.FunnelEditor(self, funnel, index, command_stack)
-            funnel_editor.grid(row=_FUNNELS_ROW, column=index)
+            funnel_editor.grid(row=_FUNNELS_ROW, column=index, sticky=tk.W+tk.E)
             funnels_editors.append(funnel_editor)
         index_structure = 0
         st_editors = []
@@ -223,8 +223,8 @@ class ShipEditor(tk.Frame):
         self._side_view.grid(row=_SIDEVIEW_ROW, columnspan=4)
 
         self._grid_var = tk.IntVar()
-        (ttk.Checkbutton(self, text="Grid", variable=self._grid_var, command=self._switch_grid).
-         grid(row=_SIDEVIEW_ROW, column=0))
+        grid_button = ttk.Checkbutton(self, text="Grid", variable=self._grid_var, command=self._switch_grid)
+        grid_button.grid(row=_SIDEVIEW_ROW, column=0)
 
     def _switch_grid(self):
         self._side_view.switch_grid(bool(self._grid_var.get()))
