@@ -4,7 +4,7 @@ import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw
 
 _WIDTH = 701
-_HEIGHT = 401
+_HEIGHT = 201
 _GRID_STEPS = 25
 _GRID_RGBA = (0, 0, 0, 125)
 
