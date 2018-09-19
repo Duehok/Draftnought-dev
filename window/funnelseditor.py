@@ -28,9 +28,12 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         self._oval_var.trace_add("write", self._switch_oval)
 
         self._update()
+        self.bind("<Button-1>", self._update)
 
         Checkbutton(self, text=f"Funnel n°{index}:  ", variable=self._active_var).grid(columnspan=3)
-        Label(self, text="  Position: ").grid()
+        pos_label = Label(self, text="  Position: ")
+        pos_label.grid()
+        pos_label.bind("<Button-1>", self._update)
         pos_entry = Entry(self, textvariable=self._position_var, width=6)
         pos_entry.grid(row=1, column=1)
         pos_entry.bind("<FocusIn>", self._update)
