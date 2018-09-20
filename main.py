@@ -18,7 +18,7 @@ import parameters_loader
 summary = logging.getLogger("Summary")
 summary.setLevel(logging.DEBUG)
 
-log_filename = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("log.txt")
+log_filename = pathlib.Path(appdirs.user_data_dir("Draftnought")).joinpath("log.txt")
 if not log_filename.exists():
     log_filename.parent.mkdir(parents=True, exist_ok=True)
 details = logging.getLogger("Details")
@@ -26,7 +26,6 @@ details.setLevel(logging.WARNING)
 file_handler = logging.handlers.RotatingFileHandler(
     log_filename, maxBytes=500*1000, backupCount=5)
 details.addHandler(file_handler)
-
 
 _MAIN_ROW = 0
 
@@ -42,13 +41,10 @@ _FUNNELS_ROW = _TOPVIEW_ROW+1
 _STRUCT_EDITORS_ROW = _FUNNELS_ROW+1
 
 class MainWindow(tk.Tk):
-    """Base class for the whole UI
-
-    Args:
-        parameters (parameters_loader.Parameters): all the parameters for the app and the ship data
-    """
+    """Base class for the whole UI"""
     def __init__(self):
         super().__init__()
+        self.winfo_toplevel().title("Draftnought")
         self.iconbitmap('icon.ico')
         self.resizable(False, False)
         self.command_stack = CommandStack()
@@ -111,13 +107,11 @@ class MainWindow(tk.Tk):
             self.center_frame.set_grid(bool(self.grid_var.get()))
 
     def do_undo(self, *_args):
-        """undo last command, or deeper in the undoing stack
-        """
+        """undo last command, or deeper in the undoing stack"""
         self.command_stack.undo()
 
     def do_redo(self, *_args):
-        """redo last command, or deeper in the redoing stack
-        """
+        """redo last command, or deeper in the redoing stack"""
         self.command_stack.redo()
 
     def do_load(self, *_args):
@@ -134,8 +128,7 @@ class MainWindow(tk.Tk):
         self.do_save_as()
 
     def do_save(self, *_args):
-        """Save the current file to the same path
-        """
+        """Save the current file to the same path"""
         self.do_save_as(self.parameters.current_file_path)
 
     def load(self, path):
@@ -181,14 +174,20 @@ class MainWindow(tk.Tk):
                 If none given, a file picker dialog allows to choose a new or existing file
         """
         if path is None:
-            file = filedialog.asksaveasfile(mode='w', filetypes=(("ship files", "*.*d"),
-                                                                 ("all files", "*.*")))
+            current_file_path = self.parameters.current_file_path
+            if not current_file_path:
+                return
+            extension = pathlib.Path(current_file_path).suffix
+            file = filedialog.asksaveasfile(defaultextension=extension,
+                                            initialfile=current_file_path,
+                                            filetypes=(("ship files", extension),
+                                                       ("all files", "*.*")))
             if file is not None:
                 summary.debug("saving file to %s", file.name)
                 self.current_ship_data.write_as_ini(file_object=file)
                 file.close()
                 self.parameters.write_app_param(file.name)
-        else:
+        elif path:
             summary.debug("saving file to %s", path)
             try:
                 with open(path, "w") as file:
@@ -209,6 +208,7 @@ class ShipEditor(tk.Frame):
     Args:
         parent (tk.Frame): parent frame in which the editor willbe displayed
         ship_data (shipdata.ShipData):
+        command_stack (framework.CommandStack): the command stack for redo/undo that is common to the whole program
         parameters (parameters_loader.Parameters): all the parameters for the app and the ship data
     """
     def __init__(self, parent, ship_data, command_stack, parameters):

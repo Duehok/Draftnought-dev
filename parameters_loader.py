@@ -1,8 +1,4 @@
-"""Centralize all the loading of data  from external files that are not in the ship file
-
-Contains default path for those files
-files in json format
-"""
+"""Centralize all the loading of data  from external files that are not in the ship file"""
 import json
 import logging
 import pathlib
@@ -57,12 +53,20 @@ class Parameters:
 
     Attributes:
         hulls_shapes (dict): for each ship type, a list of lines that define the hull outer line.
-            each line is a list of tuples (x, y) in relative coordinates
         ships_hlengths (dict): for each ship type, a dict {int:int} used to get the length
             from origin to bow
             The key is the biggest tonnage for which the length is still valid
             the value is the distance from origin to bow in funnel coordinates.
-        app_config (dict): program configuration
+        recent_files (dict): a ict of recently saved files, the side view zoom and offset for them,
+            and if the grid was displayed or not
+        turrets_positions (dict): for each turret positions, a list of (int,int) 
+            that describe their possible positions. Relative coordinates.
+        turrets_outlines (dict): for each amount of gun per turret (0=casemate), the turret's outline
+            that will be drawn in the top view. Absolute coordinates
+        turrets_scale (dict): scale factor for the turret outlines, per gun caliber
+        zoom (number): how much should the side view be zoomed, /!\ multiplied by the ship half length
+        offset (number): by how much the side pict should be horizontally offset
+        grid (bool): if the grid was displayed or not when the ship file was saved
     """
     def __init__(self, ship_file_path):
         self._recent_files = read_json(schemas.RECENT_FILES_PATH,
@@ -80,6 +84,10 @@ class Parameters:
         self.turrets_outlines = read_json(schemas.TURRETS_OUTLINES_PATH,
                                           schemas.TURRETS_OUTLINE_SCHEMA,
                                           schemas.DEFAULT_TURRETS_OUTLINE)
+        self.torpedo_outlines = read_json(schemas.TORPEDO_OUTLINES_PATH,
+                                          schemas.TORPEDO_OUTLINES_SCHEMA,
+                                          schemas.DEFAULT_TORPEDO_OUTLINES)
+
         raw_hlengths = read_json(schemas.HALF_LENGTHS_PATH,
                                  schemas.HALF_LENGTHS_SCHEMA,
                                  schemas.DEFAULT_HALF_LENGTHS)
@@ -108,17 +116,15 @@ class Parameters:
 
 
 
-    def write_app_param(self, path=None):
+    def write_app_param(self, current_file_path):
         """write the application config to a file
 
         Args:
-            new_parameters (dict): new set of parameters to write.
-                If not given, the current parameters are written.
-            file_path (str): path to the file that should be created or overwritten.
-                If not given, the default file path is used.
+            current_file_path (str): path to the file for the current ship.
+                used to rcord the path of the recently saved files
         """
-        if path is not None:
-            self._current_file_path = path
+        if current_file_path is not None:
+            self._current_file_path = current_file_path
         if self._current_file_path in self._recent_files.keys():
             del self._recent_files[self._current_file_path]
         if pathlib.Path(self._current_file_path).exists():
@@ -144,12 +150,19 @@ class Parameters:
 
     @property
     def last_file_path(self):
+        """path to the most recently saved file.
+        returns an empty string if there are none
+        does NOT check if the file exists
+        """
         if self._recent_files:
             return list(self._recent_files.keys())[-1]
         return ""
 
     @property
     def current_file_path(self):
+        """Path to the current file. Probably the same as the last savedfile path
+        Might actually be useless
+        """
         return self._current_file_path
 
 def convert_str_key_to_int(data):

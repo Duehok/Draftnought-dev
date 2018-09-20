@@ -30,6 +30,15 @@ class ShipData:
         file (str): path to the file to be read.
         parameters (parameters_loader.parameters): dict with the configurable parameters.
             Needs "ships_hlengths", see parameters_loaders or the default files for more info
+    Attrs:
+        structures (list): list of all model.Structure
+        turrets (list): list of all Turret
+        funnels (dict): dict of all funnels.
+            {"funnelname": {"Pos":number, "Oval":number}}
+        half_length (int): lengths from center to bow, in funnel coordinates
+        ship_type (string): ship type, like "BC", "DD"...
+        side_pict (PIL.Image or None): A PIL Image if a side picture path was set in the file,
+            and this path can be found and read as a picture. Else None
     """
     def __init__(self, file, parameters):
         self.structures = []
@@ -115,7 +124,15 @@ class ShipData:
 
 class Turret:
     """Container for the data needed to draw a turret
-        TODO: describe args
+    Args:
+        caliber (int): caliber of the gun in inches (urgh)
+        pos (string): the letter of the turret, like "A", "X", etc... positions 1 to 4 are also passed as strings
+        guns (int): how many guns in the turret
+        ship_hlength (int): the length from middle to bow of the ship, in funnel coordinates
+        all_turrs (list[string]): the list of all the turret position used on the ship
+        parameters (Parameters): parameters for the whole program
+    Attr:
+        outline (list[(x,y)]): a list of vertexes for the turret's outline. In funnel coordinates
     """
     def __init__(self, caliber, pos, guns, ship_hlength, all_turrs, parameters):
         to_bow = parameters.turrets_positions[pos]["to_bow"]
@@ -124,45 +141,7 @@ class Turret:
         #logic to move the turrets
         rel_position = parameters.turrets_positions[pos]["positions"][0]
 
-        if pos == "X":
-            if ("W" in all_turrs or "V" in all_turrs or
-                    "R" in all_turrs or "C" in all_turrs):
-                rel_position = parameters.turrets_positions[pos]["positions"][1]
-
-        elif pos == "W":
-            if ("X" in all_turrs or "V" in all_turrs or "B" in all_turrs):
-                rel_position = parameters.turrets_positions[pos]["positions"][1]
-
-        elif pos == "A":
-            if("V" in all_turrs or
-               {"W", "X", "Y"}.issubset(all_turrs) or
-               "C" in all_turrs and "X" in all_turrs or
-               "B" in all_turrs and "R" in all_turrs and (
-                   ("W" in all_turrs or "X" in all_turrs or "Y" in all_turrs))):
-                rel_position = parameters.turrets_positions[pos]["positions"][2]
-            elif ("X" in all_turrs or  "W" in all_turrs or
-                  "B" in all_turrs and ("C" in all_turrs or "R" in all_turrs or "W" in all_turrs)):
-                rel_position = parameters.turrets_positions[pos]["positions"][1]
-
-        elif pos == "B":
-            if("V" in all_turrs or
-               "W" in all_turrs or
-               "C" in all_turrs and ("X" in all_turrs or "Y" in all_turrs) or
-               "A" in all_turrs and "R" in all_turrs and ("X" in all_turrs or "Y" in all_turrs)):
-                rel_position = parameters.turrets_positions[pos]["positions"][2]
-            elif ("X" in all_turrs or "Y" in all_turrs or "C" in all_turrs or "R" in all_turrs):
-                rel_position = parameters.turrets_positions[pos]["positions"][1]
-
-        elif pos == "Y":
-            if (("X" in all_turrs and "W" in all_turrs.keys()) or
-                    ("V" in all_turrs and "W"in all_turrs)):
-                rel_position = parameters.turrets_positions[pos]["positions"][3]
-            elif ("V" in all_turrs or "W" in all_turrs or
-                  ({"A", "B", "C"}.issubset(all_turrs)) or
-                  ({"A", "B", "R"}.issubset(all_turrs))):
-                rel_position = parameters.turrets_positions[pos]["positions"][2]
-            elif ("B" in all_turrs or "C" in all_turrs or "R" in all_turrs or "X" in all_turrs):
-                rel_position = parameters.turrets_positions[pos]["positions"][1]
+        rel_position = rel_tur_or_torp_position(pos, all_turrs, parameters, rel_position)
 
         position = (rel_position[0]*ship_hlength, rel_position[1]*ship_hlength)
         raw_outline = parameters.turrets_outlines[guns]
@@ -175,6 +154,48 @@ class Turret:
         scaled_outline = [(point[0]*scale, point[1]*scale) for point in rotated_outline]
         #move according to position
         self.outline = [(point[0]+position[0], point[1]+position[1]) for point in scaled_outline]
+
+def rel_tur_or_torp_position(pos, all_turrs, parameters, rel_position):
+    if pos == "X":
+        if ("W" in all_turrs or "V" in all_turrs or
+                "R" in all_turrs or "C" in all_turrs):
+            rel_position = parameters.turrets_positions[pos]["positions"][1]
+
+    elif pos == "W":
+        if ("X" in all_turrs or "V" in all_turrs or "B" in all_turrs):
+            rel_position = parameters.turrets_positions[pos]["positions"][1]
+
+    elif pos == "A":
+        if("V" in all_turrs or
+            {"W", "X", "Y"}.issubset(all_turrs) or
+            "C" in all_turrs and "X" in all_turrs or
+            "B" in all_turrs and "R" in all_turrs and (
+                ("W" in all_turrs or "X" in all_turrs or "Y" in all_turrs))):
+            rel_position = parameters.turrets_positions[pos]["positions"][2]
+        elif ("X" in all_turrs or  "W" in all_turrs or
+                "B" in all_turrs and ("C" in all_turrs or "R" in all_turrs or "W" in all_turrs)):
+            rel_position = parameters.turrets_positions[pos]["positions"][1]
+
+    elif pos == "B":
+        if("V" in all_turrs or
+            "W" in all_turrs or
+            "C" in all_turrs and ("X" in all_turrs or "Y" in all_turrs) or
+            "A" in all_turrs and "R" in all_turrs and ("X" in all_turrs or "Y" in all_turrs)):
+            rel_position = parameters.turrets_positions[pos]["positions"][2]
+        elif ("X" in all_turrs or "Y" in all_turrs or "C" in all_turrs or "R" in all_turrs):
+            rel_position = parameters.turrets_positions[pos]["positions"][1]
+
+    elif pos == "Y":
+        if (("X" in all_turrs and "W" in all_turrs.keys()) or
+                ("V" in all_turrs and "W"in all_turrs)):
+            rel_position = parameters.turrets_positions[pos]["positions"][3]
+        elif ("V" in all_turrs or "W" in all_turrs or
+                ({"A", "B", "C"}.issubset(all_turrs)) or
+                ({"A", "B", "R"}.issubset(all_turrs))):
+            rel_position = parameters.turrets_positions[pos]["positions"][2]
+        elif ("B" in all_turrs or "C" in all_turrs or "R" in all_turrs or "X" in all_turrs):
+            rel_position = parameters.turrets_positions[pos]["positions"][1]
+    return rel_position
 
 class ShipFileInvalidException(Exception):
     """Errors that can be raised while reading a ship data file"""
