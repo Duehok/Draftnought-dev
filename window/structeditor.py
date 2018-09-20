@@ -173,7 +173,6 @@ class EditZone(tk.Frame):
 
         (Checkbutton(self, text="Fill", variable=self._fill_var)
          .grid(row=EditZone.FILL_CHECK_ROW, column=0, columnspan=2))
-         ttk.Separator()
 
         self._fill_var.trace_add("write", self._set_fill)
 
