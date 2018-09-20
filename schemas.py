@@ -158,7 +158,7 @@ RECENT_FILES_SCHEMA = (
 
 DEFAULT_RECENT_FILES ={}
 DEFAULT_PARAM = {
-    "zoom":1.2571630183484306,
-    "offset":-48,
+    "zoom":1.2571630183484306*257,
+    "offset":350,
     "grid":True
 }
