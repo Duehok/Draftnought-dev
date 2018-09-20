@@ -4,7 +4,6 @@ import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw
 
 _WIDTH = 701
-_HEIGHT = 401
 _GRID_STEPS = 25
 _GRID_RGBA = (0, 0, 0, 125)
 
@@ -29,8 +28,8 @@ class SideView(tk.Canvas):
             borderwidth=0
         self._tkimage = ImageTk.PhotoImage(self._image)
         super().__init__(parent, width=_WIDTH, height=self._tkimage.height(), cursor="fleur", borderwidth=borderwidth)
-
-        self._image_id = self.create_image((0, 0), image=self._tkimage, anchor=tk.NW)
+        image_center = ( parameters.offset, round(self._image.height/2.0) )
+        self._image_id = self.create_image(image_center, image=self._tkimage)
         self.grid()
         self.bind("<Motion>", self._on_move)
         self.bind("<ButtonPress-1>", self._on_click)
@@ -43,21 +42,20 @@ class SideView(tk.Canvas):
 
         self.bind("<MouseWheel>", self._on_mousewheel)
         self._re_zoom(self._parameters.zoom)
-        self.coords(self._image_id, *self._parameters.offset)
+
 
     def _on_click(self, event):
         self._left_button_down = True
-        self.scan_mark(event.x, event.y)
+        self.scan_mark(event.x, 0)
 
     def _on_unclick(self, _event):
         self._left_button_down = False
 
     def _on_move(self, event):
         if self._left_button_down:
-            self.scan_dragto(event.x, event.y, gain=1)
-            pict_ccord = self.coords(self._image_id)
-            self._parameters.offset = (-self.canvasx(-pict_ccord[0]),
-                                       -self.canvasy(-pict_ccord[1]))
+            self.scan_dragto(event.x,0, gain=1)
+            pict_coord = self.coords(self._image_id)
+            self._parameters.offset = -self.canvasx(-pict_coord[0])
             self.switch_grid(self._grid_on)
 
     def _on_mousewheel(self, event):
@@ -67,12 +65,14 @@ class SideView(tk.Canvas):
             self._parameters.zoom = self._parameters.zoom*0.99
         self._re_zoom(self._parameters.zoom)
 
-    def _re_zoom(self, new_zoom):
-        offset = self.coords(self._image_id)
-        self.delete(self._image_id)
+    def _re_zoom(self, new_zoom):       
         new_size = [round(coord*new_zoom) for coord in  self._image.size]
         self._tkimage = ImageTk.PhotoImage(self._image.resize(new_size))
-        self._image_id = self.create_image(*offset, image=self._tkimage, anchor=tk.NW)
+        self.configure(height=self._tkimage.height())
+        offset = (self.coords(self._image_id)[0],round(self.winfo_reqheight()/2.0))
+        self.delete(self._image_id)
+        self._image_id = self.create_image(*offset, image=self._tkimage)
+        self._parameters.offset = -self.canvasx(-self.coords(self._image_id)[0])
         self.switch_grid(self._grid_on)
 
 
@@ -82,6 +82,8 @@ class SideView(tk.Canvas):
         if self._grid_id != -1:
             self.delete(self._grid_id)
         if grid_on:
+            if self._grid.height() < self.winfo_reqheight() or self._grid.width() < self.winfo_reqwidth():
+                self._grid = make_grid(self.winfo_reqwidth(), self.winfo_reqheight())
             self._grid_id = self.create_image((self.canvasx(0),
                                                        self.canvasy(0)),
                                                       image=self._grid, anchor=tk.NW)
