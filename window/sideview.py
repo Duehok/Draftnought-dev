@@ -35,6 +35,7 @@ class SideView(tk.Canvas):
         self.bind("<ButtonPress-1>", self._on_click)
         self.bind("<ButtonRelease-1>", self._on_unclick)
         self._left_button_down = False
+        self._half_length = ship_data.half_length
 
         self._grid_on = False
         self._grid = make_grid(self.winfo_reqwidth(), self.winfo_reqheight())
@@ -65,8 +66,9 @@ class SideView(tk.Canvas):
             self._parameters.zoom = self._parameters.zoom*0.99
         self._re_zoom(self._parameters.zoom)
 
-    def _re_zoom(self, new_zoom):       
-        new_size = [round(coord*new_zoom) for coord in  self._image.size]
+    def _re_zoom(self, new_zoom):
+        corrected_zoom = new_zoom/self._half_length
+        new_size = [round(coord*corrected_zoom) for coord in  self._image.size]
         self._tkimage = ImageTk.PhotoImage(self._image.resize(new_size))
         self.configure(height=self._tkimage.height())
         offset = (self.coords(self._image_id)[0],round(self.winfo_reqheight()/2.0))
