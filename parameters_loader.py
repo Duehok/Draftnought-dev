@@ -108,7 +108,7 @@ class Parameters:
 
 
 
-    def write_app_param(self, path=None):
+    def write_app_param(self, current_file_path):
         """write the application config to a file
 
         Args:
@@ -117,8 +117,8 @@ class Parameters:
             file_path (str): path to the file that should be created or overwritten.
                 If not given, the default file path is used.
         """
-        if path is not None:
-            self._current_file_path = path
+        if current_file_path is not None:
+            self._current_file_path = current_file_path
         if self._current_file_path in self._recent_files.keys():
             del self._recent_files[self._current_file_path]
         if pathlib.Path(self._current_file_path).exists():

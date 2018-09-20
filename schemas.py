@@ -148,15 +148,7 @@ RECENT_FILES_SCHEMA = (
       {
         "zoom":{"type":"number"},
         "grid":{"type":"boolean"},
-        "offset":
-        {
-          "type":"array",
-          "items":
-          [
-            {"type":"number"}, {"type":"number"}
-          ],
-          "additionalItems": False
-        }
+        "offset":{"type":"number"}
       },
       "additionalProperties": False,
       "required":["zoom", "grid", "offset"]
@@ -167,6 +159,6 @@ RECENT_FILES_SCHEMA = (
 DEFAULT_RECENT_FILES ={}
 DEFAULT_PARAM = {
     "zoom":1.2571630183484306,
-    "offset":(-48, -40),
+    "offset":-48,
     "grid":True
 }
