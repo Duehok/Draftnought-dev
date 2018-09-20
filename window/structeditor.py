@@ -2,6 +2,7 @@
 """
 import tkinter as tk
 from tkinter.ttk import Treeview, Scrollbar, Entry, Label, Checkbutton, Button, Style
+from tkinter import ttk
 import model.shipdata
 import model.structure
 from window.framework import Subscriber, Observable
@@ -34,9 +35,9 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         style = Style()
         style.configure("Treeview.Heading", font=(None, 16))
 
-        self._tree.column("#", minwidth=20, width=40)
-        self._tree.column("X", minwidth=20, width=40)
-        self._tree.column("Y", minwidth=20, width=40)
+        self._tree.column("#", minwidth=20, width=40, anchor=tk.CENTER)
+        self._tree.column("X", minwidth=20, width=40, anchor=tk.CENTER)
+        self._tree.column("Y", minwidth=20, width=40, anchor=tk.CENTER)
         self._tree.heading("#", text="#")
         self._tree.heading("X", text="\u21d5")
         self._tree.heading("Y", text="\u21d4")
@@ -172,6 +173,7 @@ class EditZone(tk.Frame):
 
         (Checkbutton(self, text="Fill", variable=self._fill_var)
          .grid(row=EditZone.FILL_CHECK_ROW, column=0, columnspan=2))
+         ttk.Separator()
 
         self._fill_var.trace_add("write", self._set_fill)
 
@@ -204,12 +206,12 @@ class EditZone(tk.Frame):
         self.editable_x.trace_add("write", self._point_edited)
         self.editable_y.trace_add("write", self._point_edited)
 
-        (Button(self, text="Add Point", command=self._add_point)
-         .grid(row=EditZone.ADD_ROW, column=0, columnspan=2))
+        (Button(self, text="Add Vertex", command=self._add_point)
+         .grid(row=EditZone.ADD_ROW, column=0, columnspan=2, sticky=tk.E+tk.W))
         (Button(self, text="Delete", command=self._delete_point)
-         .grid(row=EditZone.DEL_ROW, column=0, columnspan=2))
-        (Button(self, text="Apply Symmetry", command=self._apply_symmetry)
-         .grid(row=EditZone.SYMM_ROW, column=0, columnspan=2))
+         .grid(row=EditZone.DEL_ROW, column=0, columnspan=2, sticky=tk.E+tk.W))
+        (Button(self, text="Symmetry", command=self._apply_symmetry)
+         .grid(row=EditZone.SYMM_ROW, column=0, columnspan=2, sticky=tk.E+tk.W))
 
     def set_editable_point(self, point_index):
         """Called when another point is selected

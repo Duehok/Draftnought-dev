@@ -4,6 +4,7 @@ import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw
 
 _WIDTH = 701
+_MAX_HEIGHT = 5000
 _GRID_STEPS = 25
 _GRID_RGBA = (0, 0, 0, 125)
 
@@ -28,7 +29,8 @@ class SideView(tk.Canvas):
             self._image = Image.new(mode="RGBA",size=(1,1),color=(0, 0, 0, 0))
             borderwidth=0
         self._tkimage = ImageTk.PhotoImage(self._image)
-        super().__init__(parent, width=_WIDTH, height=self._tkimage.height(), cursor="fleur", borderwidth=borderwidth)
+        height = min(self._tkimage.height(), _MAX_HEIGHT)
+        super().__init__(parent, width=_WIDTH, height=height, cursor="fleur", borderwidth=borderwidth)
         image_center = ( parameters.offset, round(self._image.height/2.0) )
         self._image_id = self.create_image(image_center, image=self._tkimage)
         self.grid()
@@ -79,7 +81,8 @@ class SideView(tk.Canvas):
         corrected_zoom = new_zoom/self._half_length
         new_size = [round(coord*corrected_zoom) for coord in  self._image.size]
         self._tkimage = ImageTk.PhotoImage(self._image.resize(new_size))
-        self.configure(height=self._tkimage.height())
+        height = min(self._tkimage.height(), _MAX_HEIGHT)
+        self.configure(height=height)
         offset = (self.coords(self._image_id)[0],round(self.winfo_reqheight()/2.0))
         self.delete(self._image_id)
         self._image_id = self.create_image(*offset, image=self._tkimage)
