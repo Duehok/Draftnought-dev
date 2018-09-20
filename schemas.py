@@ -3,7 +3,7 @@ import pathlib
 
 #Turret positions
 TURRETS = ["1", "2", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
-           "Q", "R", "S", "T", "V", "W", "X", "Y", "3", "4"]
+           "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "3", "4"]
 
 TURRETS_POSITION_PATH = "./data/turrets_positions.json"
 TURRETS_POSITION_SCHEMA = (

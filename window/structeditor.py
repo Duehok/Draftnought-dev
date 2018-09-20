@@ -2,7 +2,6 @@
 """
 import tkinter as tk
 from tkinter.ttk import Treeview, Scrollbar, Entry, Label, Checkbutton, Button, Style
-from tkinter import ttk
 import model.shipdata
 import model.structure
 from window.framework import Subscriber, Observable
@@ -155,14 +154,13 @@ class EditZone(tk.Frame):
         command_stack (Command Stack): the undo/redo stack common to the whole programm
         on_get_focus (function): a function that takes no args called when this widget get the focus
     """
-    #TODO: rename constants with an underscore_
-    FILL_CHECK_ROW = 0
-    POINT_INDEX_ROW = FILL_CHECK_ROW+1
-    X_ROW = POINT_INDEX_ROW+1
-    Y_ROW = X_ROW+1
-    ADD_ROW = Y_ROW+1
-    DEL_ROW = ADD_ROW+1
-    SYMM_ROW = DEL_ROW+1
+    _FILL_CHECK_ROW = 0
+    _POINT_INDEX_ROW = _FILL_CHECK_ROW+1
+    _X_ROW = _POINT_INDEX_ROW+1
+    _Y_ROW = _X_ROW+1
+    _ADD_ROW = _Y_ROW+1
+    _DEL_ROW = _ADD_ROW+1
+    _SYMM_ROW = _DEL_ROW+1
 
     def __init__(self, parent, structure, command_stack, on_get_focus):
         tk.Frame.__init__(self, parent)
@@ -172,21 +170,21 @@ class EditZone(tk.Frame):
         self._fill_var.set(self._structure.fill)
 
         (Checkbutton(self, text="Fill", variable=self._fill_var)
-         .grid(row=EditZone.FILL_CHECK_ROW, column=0, columnspan=2))
+         .grid(row=EditZone._FILL_CHECK_ROW, column=0, columnspan=2))
 
         self._fill_var.trace_add("write", self._set_fill)
 
         self._point_index = -1
         self._point_index_var = tk.StringVar()
         top_label = Label(self, textvariable=self._point_index_var)
-        top_label.grid(row=EditZone.POINT_INDEX_ROW, column=0, columnspan=2)
+        top_label.grid(row=EditZone._POINT_INDEX_ROW, column=0, columnspan=2)
         top_label.bind("<Button-1>", on_get_focus)
 
         x_label = Label(self, text="\u21d5:")
-        x_label.grid(row=EditZone.X_ROW, column=0, sticky=tk.E)
+        x_label.grid(row=EditZone._X_ROW, column=0, sticky=tk.E)
         x_label.bind("<Button-1>", on_get_focus)
         y_label = Label(self, text="\u21d4:")
-        y_label.grid(row=EditZone.Y_ROW, column=0, sticky=tk.E)
+        y_label.grid(row=EditZone._Y_ROW, column=0, sticky=tk.E)
         y_label.bind("<Button-1>", on_get_focus)
         #the updating_ booleans allow to detect if the stringvars are edited
         #because the point is selected
@@ -196,21 +194,21 @@ class EditZone(tk.Frame):
         self.editable_y = tk.StringVar()
 
         setx = Entry(self, textvariable=self.editable_x, width=6)
-        setx.grid(row=EditZone.X_ROW, column=1, sticky=tk.W)
+        setx.grid(row=EditZone._X_ROW, column=1, sticky=tk.W)
         setx.bind("<FocusIn>", on_get_focus)
         sety = Entry(self, textvariable=self.editable_y, width=6)
-        sety.grid(row=EditZone.Y_ROW, column=1, sticky=tk.W)
+        sety.grid(row=EditZone._Y_ROW, column=1, sticky=tk.W)
         sety.bind("<FocusIn>", on_get_focus)
 
         self.editable_x.trace_add("write", self._point_edited)
         self.editable_y.trace_add("write", self._point_edited)
 
         (Button(self, text="Add Vertex", command=self._add_point)
-         .grid(row=EditZone.ADD_ROW, column=0, columnspan=2, sticky=tk.E+tk.W))
+         .grid(row=EditZone._ADD_ROW, column=0, columnspan=2, sticky=tk.E+tk.W))
         (Button(self, text="Delete", command=self._delete_point)
-         .grid(row=EditZone.DEL_ROW, column=0, columnspan=2, sticky=tk.E+tk.W))
+         .grid(row=EditZone._DEL_ROW, column=0, columnspan=2, sticky=tk.E+tk.W))
         (Button(self, text="Symmetry", command=self._apply_symmetry)
-         .grid(row=EditZone.SYMM_ROW, column=0, columnspan=2, sticky=tk.E+tk.W))
+         .grid(row=EditZone._SYMM_ROW, column=0, columnspan=2, sticky=tk.E+tk.W))
 
     def set_editable_point(self, point_index):
         """Called when another point is selected

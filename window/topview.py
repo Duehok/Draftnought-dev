@@ -54,7 +54,7 @@ class TopView(tk.Canvas):
         for funnel_editor in funnel_editors:
             funnel_editor.subscribe(self._on_notification)
 
-        self._turrets = ship_data.turrets
+        self._turrets = ship_data.turrets_torps
 
         self._grid = make_grid(self.winfo_reqwidth(), self.winfo_reqheight(), horizontal=True)
         self._grid_on = False
