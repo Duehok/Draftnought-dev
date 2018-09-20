@@ -27,7 +27,6 @@ file_handler = logging.handlers.RotatingFileHandler(
     log_filename, maxBytes=500*1000, backupCount=5)
 details.addHandler(file_handler)
 
-
 _MAIN_ROW = 0
 
 _LOG_ROW = _MAIN_ROW +1
@@ -42,11 +41,7 @@ _FUNNELS_ROW = _TOPVIEW_ROW+1
 _STRUCT_EDITORS_ROW = _FUNNELS_ROW+1
 
 class MainWindow(tk.Tk):
-    """Base class for the whole UI
-
-    Args:
-        parameters (parameters_loader.Parameters): all the parameters for the app and the ship data
-    """
+    """Base class for the whole UI"""
     def __init__(self):
         super().__init__()
         self.iconbitmap('icon.ico')
@@ -111,13 +106,11 @@ class MainWindow(tk.Tk):
             self.center_frame.set_grid(bool(self.grid_var.get()))
 
     def do_undo(self, *_args):
-        """undo last command, or deeper in the undoing stack
-        """
+        """undo last command, or deeper in the undoing stack"""
         self.command_stack.undo()
 
     def do_redo(self, *_args):
-        """redo last command, or deeper in the redoing stack
-        """
+        """redo last command, or deeper in the redoing stack"""
         self.command_stack.redo()
 
     def do_load(self, *_args):
@@ -134,8 +127,7 @@ class MainWindow(tk.Tk):
         self.do_save_as()
 
     def do_save(self, *_args):
-        """Save the current file to the same path
-        """
+        """Save the current file to the same path"""
         self.do_save_as(self.parameters.current_file_path)
 
     def load(self, path):
@@ -209,6 +201,7 @@ class ShipEditor(tk.Frame):
     Args:
         parent (tk.Frame): parent frame in which the editor willbe displayed
         ship_data (shipdata.ShipData):
+        command_stack (framework.CommandStack): the command stack for redo/undo that is common to the whole program
         parameters (parameters_loader.Parameters): all the parameters for the app and the ship data
     """
     def __init__(self, parent, ship_data, command_stack, parameters):
