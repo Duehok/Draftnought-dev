@@ -31,15 +31,6 @@ _MAIN_ROW = 0
 
 _LOG_ROW = _MAIN_ROW +1
 
-_SIDEVIEW_ROW = 0
-_TOPVIEW_ROW = _SIDEVIEW_ROW+1
-_SIDEVIEW_COL = 1
-_TOPVIEW_COL = _SIDEVIEW_COL
-
-_FUNNELS_ROW = _TOPVIEW_ROW+1
-
-_STRUCT_EDITORS_ROW = _FUNNELS_ROW+1
-
 class MainWindow(tk.Tk):
     """Base class for the whole UI"""
     def __init__(self):
@@ -156,17 +147,11 @@ class MainWindow(tk.Tk):
         self.center_frame.destroy()
         #reset the command stack
         new_command_stack = CommandStack()
-        try:
-            self.center_frame = ShipEditor(self,
-                                        self.current_ship_data,
-                                        new_command_stack,
-                                        self.parameters)
-            self.center_frame.grid(row=_MAIN_ROW)
-        except Exception as error:
-            summary.error("The file is not a valid ship file:\n%s\nPlease load it in-game and save it again", path)
-            details.error("Error trying to display the file:\n%s,%s", path, error)
-            self.parameters = old_parameters
-            return
+        self.center_frame = ShipEditor(self,
+                                    self.current_ship_data,
+                                    new_command_stack,
+                                    self.parameters)
+        self.center_frame.grid(row=_MAIN_ROW)
 
         #if load was OK, forget the old command stack
         self.command_stack = new_command_stack
@@ -223,27 +208,29 @@ class ShipEditor(tk.Frame):
     """
     def __init__(self, parent, ship_data, command_stack, parameters):
         super().__init__(parent)
-
+        self.grid_rowconfigure(0,weight=1)
         funnels_editors = []
         for index, funnel in enumerate(ship_data.funnels.values()):
             funnel_editor = funnelseditor.FunnelEditor(self, funnel, index, command_stack)
-            funnel_editor.grid(row=_FUNNELS_ROW, column=index, sticky=tk.W+tk.E)
+            funnel_editor.grid(row=(index//2)+1, column=index%2, sticky=tk.W+tk.E)
             funnels_editors.append(funnel_editor)
-        index_structure = 0
         st_editors = []
-        for index_structure, structure in enumerate(ship_data.structures):
+        for index, structure in enumerate(ship_data.structures):
             new_st_display = structeditor.StructEditor(self, structure, command_stack)
-            new_st_display.grid(row=_STRUCT_EDITORS_ROW, column=index_structure)
+            new_st_display.grid(row=(index//2)+3, column=index%2)
             st_editors.append(new_st_display)
 
-        self._top_view = topview.TopView(self, ship_data, st_editors,
+        views =tk.Frame(self)
+        self._side_view = sideview.SideView(views, ship_data, parameters)
+        self._side_view.grid(row=0, column=0)
+
+        self._top_view = topview.TopView(views, ship_data, st_editors,
                                          funnels_editors, command_stack, parameters)
-        self._top_view.grid(row=_TOPVIEW_ROW, columnspan=4)
+        self._top_view.grid(row=1, column=0)
+
+        views.grid(row=0,column=2,rowspan=5)
 
         st_editors[0]._on_get_focus()
-
-        self._side_view = sideview.SideView(self, ship_data, parameters)
-        self._side_view.grid(row=_SIDEVIEW_ROW, columnspan=4)
 
     def set_grid(self, grid_state):
         self._side_view.switch_grid(grid_state)
