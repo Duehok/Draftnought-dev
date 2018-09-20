@@ -44,6 +44,7 @@ class MainWindow(tk.Tk):
     """Base class for the whole UI"""
     def __init__(self):
         super().__init__()
+        self.winfo_toplevel().title("Draftnought")
         self.iconbitmap('icon.ico')
         self.resizable(False, False)
         self.command_stack = CommandStack()
@@ -173,14 +174,20 @@ class MainWindow(tk.Tk):
                 If none given, a file picker dialog allows to choose a new or existing file
         """
         if path is None:
-            file = filedialog.asksaveasfile(mode='w', filetypes=(("ship files", "*.*d"),
-                                                                 ("all files", "*.*")))
+            current_file_path = self.parameters.current_file_path
+            if not current_file_path:
+                return
+            extension = pathlib.Path(current_file_path).suffix
+            file = filedialog.asksaveasfile(defaultextension=extension,
+                                            initialfile=current_file_path,
+                                            filetypes=(("ship files", extension),
+                                                       ("all files", "*.*")))
             if file is not None:
                 summary.debug("saving file to %s", file.name)
                 self.current_ship_data.write_as_ini(file_object=file)
                 file.close()
                 self.parameters.write_app_param(file.name)
-        else:
+        elif path:
             summary.debug("saving file to %s", path)
             try:
                 with open(path, "w") as file:

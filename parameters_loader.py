@@ -84,6 +84,10 @@ class Parameters:
         self.turrets_outlines = read_json(schemas.TURRETS_OUTLINES_PATH,
                                           schemas.TURRETS_OUTLINE_SCHEMA,
                                           schemas.DEFAULT_TURRETS_OUTLINE)
+        self.torpedo_outlines = read_json(schemas.TORPEDO_OUTLINES_PATH,
+                                          schemas.TORPEDO_OUTLINES_SCHEMA,
+                                          schemas.DEFAULT_TORPEDO_OUTLINES)
+
         raw_hlengths = read_json(schemas.HALF_LENGTHS_PATH,
                                  schemas.HALF_LENGTHS_SCHEMA,
                                  schemas.DEFAULT_HALF_LENGTHS)
