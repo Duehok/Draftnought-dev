@@ -16,6 +16,7 @@ class SideView(tk.Canvas):
     Args:
         parent (tk.Frame): the parent frame where the picture goes
         shipdata (model.shipdata): shipdata that has, or does not have, a side_pict
+        parameters: all the parameters for the program
     """
     def __init__(self, parent, ship_data, parameters):
         (parent)
@@ -46,6 +47,9 @@ class SideView(tk.Canvas):
 
 
     def _on_click(self, event):
+        """Mark the start of the pan
+        no pan along y axis
+        """
         self._left_button_down = True
         self.scan_mark(event.x, 0)
 
@@ -53,6 +57,9 @@ class SideView(tk.Canvas):
         self._left_button_down = False
 
     def _on_move(self, event):
+        """If the button is down, pan the view
+        no pan along y axis
+        """
         if self._left_button_down:
             self.scan_dragto(event.x,0, gain=1)
             pict_coord = self.coords(self._image_id)
@@ -60,6 +67,7 @@ class SideView(tk.Canvas):
             self.switch_grid(self._grid_on)
 
     def _on_mousewheel(self, event):
+        """Mouse wheel changes the zoom"""
         if event.delta > 0:
             self._parameters.zoom = self._parameters.zoom*1.01
         else:
@@ -67,6 +75,7 @@ class SideView(tk.Canvas):
         self._re_zoom(self._parameters.zoom)
 
     def _re_zoom(self, new_zoom):
+        """When changing zoom, redraw the pict to the new zoom, resize the canvas"""
         corrected_zoom = new_zoom/self._half_length
         new_size = [round(coord*corrected_zoom) for coord in  self._image.size]
         self._tkimage = ImageTk.PhotoImage(self._image.resize(new_size))
@@ -79,7 +88,10 @@ class SideView(tk.Canvas):
 
 
     def switch_grid(self, grid_on):
-        """Display or hide the grid according to grid_on"""
+        """Update the grid according to grid_on
+        Resize the grid if the previous grid was too small
+        No resize if the grid is too big!
+        """
         self._grid_on = grid_on
         if self._grid_id != -1:
             self.delete(self._grid_id)
