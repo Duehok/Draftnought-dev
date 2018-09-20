@@ -1,6 +1,6 @@
-from schemas import TURRETS
-
 """Turrets and torpedo mpunt data in a useable form"""
+
+from schemas import TURRETS
 
 class Turret:
     """Container for the data needed to draw a turret
@@ -86,6 +86,15 @@ def rel_tur_or_torp_position(pos, all_turrs, parameters):
     return rel_position
 
 class Torpedo:
+    """Container for the data needed to draw a torpedo mount
+    Args:
+        section_content (dict): the a TorpedoMount<x> section from the parser
+            that read the ship file
+        half_length (int): the length from middle to bow of the ship, in funnel coordinates
+        parameters (Parameters): parameters for the whole program
+    Attr:
+        outline (list[(x,y)]): a list of vertexes for the mount's outline. In funnel coordinates
+    """
     def __init__(self, section_content, half_length, parameters):
         pos = section_content["Pos"]
         tubes_count = int(section_content["Tubes"])
@@ -93,11 +102,11 @@ class Torpedo:
         if pos in TURRETS:
             to_bow = parameters.turrets_positions[pos]["to_bow"]
             rel_position = parameters.turrets_positions[pos]["positions"][0]
-            
+
         else:
             to_bow = True
             #draw the mount outside of the visible area, so hidden
-            rel_position = [0,1.5]
+            rel_position = [0, 1.5]
 
         position = (rel_position[0]*half_length, rel_position[1]*half_length)
         raw_outline = parameters.torpedo_outlines[tubes_count]

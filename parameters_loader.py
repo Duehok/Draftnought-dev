@@ -59,19 +59,19 @@ class Parameters:
             the value is the distance from origin to bow in funnel coordinates.
         recent_files (dict): a ict of recently saved files, the side view zoom and offset for them,
             and if the grid was displayed or not
-        turrets_positions (dict): for each turret positions, a list of (int,int) 
+        turrets_positions (dict): for each turret positions, a list of (int,int)
             that describe their possible positions. Relative coordinates.
-        turrets_outlines (dict): for each amount of gun per turret (0=casemate), the turret's outline
+        turrets_outlines(dict): for each amount of gun per turret (0=casemate), the turret's outline
             that will be drawn in the top view. Absolute coordinates
         turrets_scale (dict): scale factor for the turret outlines, per gun caliber
-        zoom (number): how much should the side view be zoomed, /!\ multiplied by the ship half length
+        zoom (number): how much should the side view be zoomed, ! multiplied by the ship half length
         offset (number): by how much the side pict should be horizontally offset
         grid (bool): if the grid was displayed or not when the ship file was saved
     """
     def __init__(self, ship_file_path):
         self._recent_files = read_json(schemas.RECENT_FILES_PATH,
-                                     schemas.RECENT_FILES_SCHEMA,
-                                     schemas.DEFAULT_RECENT_FILES)
+                                       schemas.RECENT_FILES_SCHEMA,
+                                       schemas.DEFAULT_RECENT_FILES)
         self.hulls_shapes = read_json(schemas.HULLS_SHAPES_PATH,
                                       schemas.HULLS_SHAPES_SCHEMA,
                                       schemas.DEFAULT_HULLS_SHAPES)
@@ -96,7 +96,7 @@ class Parameters:
         for ship_type, lengths_dicts in raw_hlengths.items():
             self.ships_hlengths[ship_type] = convert_str_key_to_int(lengths_dicts)
 
-        #if the requested file is in the list of recent files, 
+        #if the requested file is in the list of recent files,
         #use its zoom and offset for the side pict
         #if not, use the moset recent file if it exists
         #if not, default values
@@ -107,6 +107,7 @@ class Parameters:
         self.grid = self.file_param("grid")
 
     def file_param(self, param):
+        """set default value for recent file parameter"""
         if self._current_file_path in self._recent_files.keys():
             return self._recent_files[self._current_file_path][param]
         if self._recent_files:
@@ -133,9 +134,8 @@ class Parameters:
             self._recent_files[self._current_file_path]["offset"] = self.offset
             self._recent_files[self._current_file_path]["grid"] = self.grid
         if len(self._recent_files) > MAX_RECENT_FILES:
-            self._recent_files = {f:self._recent_files[f] 
-                                  for f in list(
-                                                self._recent_files.keys())[len(self._recent_files)
+            self._recent_files = {f:self._recent_files[f]
+                                  for f in list(self._recent_files.keys())[len(self._recent_files)
                                                                            -MAX_RECENT_FILES:]}
 
         try:
@@ -146,7 +146,8 @@ class Parameters:
                 details.info("Saved app parameters to %s", schemas.RECENT_FILES_PATH)
         except OSError as error:
             summary.warning("Could not save app config file to: %s", schemas.RECENT_FILES_PATH)
-            details.warning("Could not save app config file to: %s\n%s", schemas.RECENT_FILES_PATH, error)
+            details.warning("Could not save app config file to: %s\n%s",
+                            schemas.RECENT_FILES_PATH, error)
 
     @property
     def last_file_path(self):

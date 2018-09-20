@@ -93,8 +93,8 @@ class ShipData:
 
 
         self.turrets_torps = [Turret(caliber, k, v, self.half_length, turret_data, parameters)
-                        for k, v in turret_data.items()] + torps
-        
+                              for k, v in turret_data.items()] + torps
+
 
         self.funnels = parse_funnels(self._parser["Funnels"])
 

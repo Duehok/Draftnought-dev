@@ -139,7 +139,8 @@ class MainWindow(tk.Tk):
         except sd.ShipFileInvalidException as error:
             details.error("The file is not correctly formatted to be a ship file:\n%s\n%s",
                           path, error)
-            summary.error("The file is not correctly formatted to be a ship file:\n%s\nPlease load it in-game and save it again", path)
+            summary.error("The file is not correctly formatted to be a ship file:"
+                          "\n%s\nPlease load it in-game and save it again", path)
             self.parameters = old_parameters
             return
 
@@ -148,9 +149,9 @@ class MainWindow(tk.Tk):
         #reset the command stack
         new_command_stack = CommandStack()
         self.center_frame = ShipEditor(self,
-                                    self.current_ship_data,
-                                    new_command_stack,
-                                    self.parameters)
+                                       self.current_ship_data,
+                                       new_command_stack,
+                                       self.parameters)
         self.center_frame.grid(row=_MAIN_ROW)
 
         #if load was OK, forget the old command stack
@@ -203,12 +204,12 @@ class ShipEditor(tk.Frame):
     Args:
         parent (tk.Frame): parent frame in which the editor willbe displayed
         ship_data (shipdata.ShipData):
-        command_stack (framework.CommandStack): the command stack for redo/undo that is common to the whole program
+        command_stack (CommandStack): the  redo/undo  command stack common to the whole program
         parameters (parameters_loader.Parameters): all the parameters for the app and the ship data
     """
     def __init__(self, parent, ship_data, command_stack, parameters):
         super().__init__(parent)
-        self.grid_rowconfigure(0,weight=1)
+        self.grid_rowconfigure(0, weight=1)
         funnels_editors = []
         for index, funnel in enumerate(ship_data.funnels.values()):
             funnel_editor = funnelseditor.FunnelEditor(self, funnel, index, command_stack)
@@ -220,7 +221,7 @@ class ShipEditor(tk.Frame):
             new_st_display.grid(row=(index//2)+3, column=index%2)
             st_editors.append(new_st_display)
 
-        views =tk.Frame(self)
+        views = tk.Frame(self)
         self._side_view = sideview.SideView(views, ship_data, parameters)
         self._side_view.grid(row=0, column=0)
 
@@ -228,12 +229,13 @@ class ShipEditor(tk.Frame):
                                          funnels_editors, command_stack, parameters)
         self._top_view.grid(row=1, column=0)
 
-        views.grid(row=0,column=2,rowspan=5)
+        views.grid(row=0, column=2, rowspan=5)
 
         st_editors[0]._on_get_focus()
 
     def set_grid(self, grid_state):
-        self._side_view.switch_grid(grid_state)
+        """set the grid for both top and side view according to grid_state"""
+        self._side_view.refresh_grid(grid_state)
         self._top_view.switch_grid(grid_state)
 
 

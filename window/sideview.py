@@ -20,18 +20,21 @@ class SideView(tk.Canvas):
         parameters: all the parameters for the program
     """
     def __init__(self, parent, ship_data, parameters):
-        (parent)
         self._parameters = parameters
         if ship_data.side_pict:
             self._image = ship_data.side_pict
-            borderwidth=2
+            borderwidth = 2
         else:
-            self._image = Image.new(mode="RGBA",size=(1,1),color=(0, 0, 0, 0))
-            borderwidth=0
+            self._image = Image.new(mode="RGBA", size=(1, 1), color=(0, 0, 0, 0))
+            borderwidth = 0
         self._tkimage = ImageTk.PhotoImage(self._image)
         height = min(self._tkimage.height(), _MAX_HEIGHT)
-        super().__init__(parent, width=_WIDTH, height=height, cursor="fleur", borderwidth=borderwidth)
-        image_center = ( parameters.offset, round(self._image.height/2.0) )
+        super().__init__(parent,
+                         width=_WIDTH,
+                         height=height,
+                         cursor="fleur",
+                         borderwidth=borderwidth)
+        image_center = (parameters.offset, round(self._image.height/2.0))
         self._image_id = self.create_image(image_center, image=self._tkimage)
         self.grid()
         self.bind("<Motion>", self._on_move)
@@ -63,10 +66,10 @@ class SideView(tk.Canvas):
         no pan along y axis
         """
         if self._left_button_down:
-            self.scan_dragto(event.x,0, gain=1)
+            self.scan_dragto(event.x, 0, gain=1)
             pict_coord = self.coords(self._image_id)
             self._parameters.offset = -self.canvasx(-pict_coord[0])
-            self.switch_grid(self._grid_on)
+            self.refresh_grid(self._grid_on)
 
     def _on_mousewheel(self, event):
         """Mouse wheel changes the zoom"""
@@ -83,14 +86,14 @@ class SideView(tk.Canvas):
         self._tkimage = ImageTk.PhotoImage(self._image.resize(new_size))
         height = min(self._tkimage.height(), _MAX_HEIGHT)
         self.configure(height=height)
-        offset = (self.coords(self._image_id)[0],round(self.winfo_reqheight()/2.0))
+        offset = (self.coords(self._image_id)[0], round(self.winfo_reqheight()/2.0))
         self.delete(self._image_id)
         self._image_id = self.create_image(*offset, image=self._tkimage)
         self._parameters.offset = -self.canvasx(-self.coords(self._image_id)[0])
-        self.switch_grid(self._grid_on)
+        self.refresh_grid(self._grid_on)
 
 
-    def switch_grid(self, grid_on):
+    def refresh_grid(self, grid_on):
         """Update the grid according to grid_on
         Resize the grid if the previous grid was too small
         No resize if the grid is too big!
@@ -99,11 +102,12 @@ class SideView(tk.Canvas):
         if self._grid_id != -1:
             self.delete(self._grid_id)
         if grid_on:
-            if self._grid.height() < self.winfo_reqheight() or self._grid.width() < self.winfo_reqwidth():
+            if (self._grid.height() < self.winfo_reqheight() or
+                    self._grid.width() < self.winfo_reqwidth()):
                 self._grid = make_grid(self.winfo_reqwidth(), self.winfo_reqheight())
             self._grid_id = self.create_image((self.canvasx(0),
-                                                       self.canvasy(0)),
-                                                      image=self._grid, anchor=tk.NW)
+                                               self.canvasy(0)),
+                                              image=self._grid, anchor=tk.NW)
 
 def make_grid(width, height, horizontal=False):
     """Build a semi-transparent grid in a picture

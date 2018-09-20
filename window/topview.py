@@ -70,7 +70,7 @@ class TopView(tk.Canvas):
 
         scaled so that the full length of the ship fits exactly the width of the canvas
         Args:
-            half_length (number): the half-length of the ship. 
+            half_length (number): the half-length of the ship.
                 The converters are set up so that if fits neatly in the canvas
 
         Returns:
@@ -223,9 +223,9 @@ class TopView(tk.Canvas):
                 editor.configure(relief="sunken")
                 self._drawings_ids = (self._drawings_ids
                                       + self._draw_structure(editor.points,
-                                                            editor.fill,
-                                                            selected_index=editor.selected_index,
-                                                            mouse_xy=mouse_rel_pos))
+                                                             editor.fill,
+                                                             selected_index=editor.selected_index,
+                                                             mouse_xy=mouse_rel_pos))
             else:
                 editor.configure(relief="raised")
                 self._drawings_ids = (self._drawings_ids
@@ -235,9 +235,9 @@ class TopView(tk.Canvas):
             if editor == active_editor:
                 editor.configure(relief="sunken")
                 self._drawings_ids = (self._drawings_ids
-                                        + self._draw_funnel(editor.position,
-                                                            editor.oval,
-                                                            mouse_rel_pos[0]))
+                                      + self._draw_funnel(editor.position,
+                                                          editor.oval,
+                                                          mouse_rel_pos[0]))
             else:
                 editor.configure(relief="raised")
                 if editor.position != 0:
