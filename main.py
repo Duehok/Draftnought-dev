@@ -18,7 +18,7 @@ import parameters_loader
 summary = logging.getLogger("Summary")
 summary.setLevel(logging.DEBUG)
 
-log_filename = pathlib.Path(appdirs.user_data_dir("Drafnought")).joinpath("log.txt")
+log_filename = pathlib.Path(appdirs.user_data_dir("Draftnought")).joinpath("log.txt")
 if not log_filename.exists():
     log_filename.parent.mkdir(parents=True, exist_ok=True)
 details = logging.getLogger("Details")
