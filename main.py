@@ -139,26 +139,35 @@ class MainWindow(tk.Tk):
                 If none is given, a dialog box is opened to choose it.
         """
         summary.debug("loading %s", path)
+        #save old parameters in case something goes wrong
+        old_parameters = self.parameters
         self.parameters = parameters_loader.Parameters(path)
         try:
             with open(path) as file:
                 self.current_ship_data = sd.ShipData(file, self.parameters)
         except sd.ShipFileInvalidException as error:
-            details.error("The file is not correctly formatted to be a ship file!\n%s\n%s",
+            details.error("The file is not correctly formatted to be a ship file:\n%s\n%s",
                           path, error)
-            summary.error("The file is not correctly formatted to be a ship file!")
+            summary.error("The file is not correctly formatted to be a ship file:\n%s\nPlease load it in-game and save it again", path)
+            self.parameters = old_parameters
             return
 
         summary.info("loading successful!")
         self.center_frame.destroy()
         #reset the command stack
         new_command_stack = CommandStack()
-        #TODO: handle last loading failure
-        self.center_frame = ShipEditor(self,
-                                       self.current_ship_data,
-                                       new_command_stack,
-                                       self.parameters)
-        self.center_frame.grid(row=_MAIN_ROW)
+        try:
+            self.center_frame = ShipEditor(self,
+                                        self.current_ship_data,
+                                        new_command_stack,
+                                        self.parameters)
+            self.center_frame.grid(row=_MAIN_ROW)
+        except Exception as error:
+            summary.error("The file is not a valid ship file:\n%s\nPlease load it in-game and save it again", path)
+            details.error("Error trying to display the file:\n%s,%s", path, error)
+            self.parameters = old_parameters
+            return
+
         #if load was OK, forget the old command stack
         self.command_stack = new_command_stack
         self.grid_var.set(int(self.parameters.grid))
@@ -179,7 +188,8 @@ class MainWindow(tk.Tk):
                 return
             extension = pathlib.Path(current_file_path).suffix
             file = filedialog.asksaveasfile(defaultextension=extension,
-                                            initialfile=current_file_path,
+                                            initialdir=pathlib.Path(current_file_path).parent,
+                                            initialfile=pathlib.Path(current_file_path).name,
                                             filetypes=(("ship files", extension),
                                                        ("all files", "*.*")))
             if file is not None:
