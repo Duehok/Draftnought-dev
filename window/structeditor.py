@@ -26,6 +26,7 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         self._command_stack = command_stack
 
         self.bind("<Button-1>", self._on_get_focus)
+        self.bind("<FocusOut>", self._on_lost_focus)
 
         self._tree = Treeview(self, columns=["#", "X", "Y"], selectmode="browse")
         #kill the icon column
@@ -44,6 +45,7 @@ class StructEditor(tk.Frame, Subscriber, Observable):
 
         self._tree.bind("<<TreeviewSelect>>", self._on_point_selected)
         self._tree.bind("<FocusIn>", self._on_get_focus)
+        self._tree.bind("<FocusOut>", self._on_lost_focus)
 
         scroll = Scrollbar(self, command=self._tree.yview)
         scroll.grid(row=0, column=SCROLL_COL, sticky=tk.N+tk.S)
@@ -65,20 +67,24 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         """
         if new_sel_index >= 0 and new_sel_index <= len(self.points) -1:
             iid = self._tree.get_children()[new_sel_index]
-            self._tree.focus(iid)
             self._tree.selection_set(iid)
 
     def _on_get_focus(self, *_args):
         if self._index_of_sel_point == -1:
             self._force_selection(0)
+        self.configure(relief="sunken")
         self._notify("focus", {})
+
+    def _on_lost_focus(self, event):
+        if event.widget not in self.winfo_children():
+            self.configure(relief="raised")
 
     def _on_point_selected(self, _event):
         """called back when a point is selected in the table/treeview
 
         Updates the editable fields
         """
-        selected_iid = self._tree.focus()
+        selected_iid = self._tree.selection()
         self._index_of_sel_point = self._tree.index(selected_iid)
         self._edit_zone.set_editable_point(self._tree.item(selected_iid)["values"][0])
         self._notify("focus", {})
