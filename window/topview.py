@@ -250,7 +250,7 @@ class TopView(tk.Canvas):
             self._drawings_ids = self._drawings_ids + self._draw_turret(turret)
 
         if self._grid_on:
-            self._drawings_ids.append(self.create_image((0, 0), image=self._grid, anchor=tk.NW))
+            self._drawings_ids.append(self.create_image((self.canvasx(0), self.canvasy(0)), image=self._grid, anchor=tk.NW))
 
     def _on_drag(self, event):
         self._dragging = True
