@@ -67,7 +67,8 @@ class TopView(tk.Canvas):
         self.bind("<B1-Motion>", self._on_drag)
         self.bind("<Enter>", self._on_mouse_move)
         self.bind("<Leave>", self._on_mouse_move)
-        self.bind("<ButtonRelease-1>", self._on_left_click)
+        self.bind("<ButtonPress-1>", self._on_click)
+        self.bind("<ButtonRelease-1>", self._on_left_release)
 
     def make_converters(self, half_length):
         """give converters from funnel to canvas coordinates and vice-versa
@@ -83,8 +84,8 @@ class TopView(tk.Canvas):
                 canvas ti funnel
         """
         coord_factor = (self.winfo_reqwidth()/2.1)/half_length
-        xoffset = self.winfo_reqwidth()/2.0 + self.canvasx(0)
-        yoffset = self.winfo_reqheight()/2.0 + self.canvasy(0)
+        xoffset = self.winfo_reqwidth()/2.0
+        yoffset = self.winfo_reqheight()/2.0
 
         def funnel_to_canvas(point):
             """convert from funnel to canvas coordinates
@@ -210,8 +211,9 @@ class TopView(tk.Canvas):
             active_editor: the struct or funnel editor that is currently active.
                 this editor will get the mouse clicks to modify the funnel or structure.
         """
-        mouse_x = self.winfo_pointerx() - self.winfo_rootx()
-        mouse_y = self.winfo_pointery() - self.winfo_rooty()
+
+        mouse_x = self.winfo_pointerx() - self.winfo_rootx() + self.canvasx(0)
+        mouse_y = self.winfo_pointery() - self.winfo_rooty() + self.canvasy(0)
         if (mouse_x >= 0 and mouse_y >= 0
                 and mouse_x <= self.winfo_width() - 1 and mouse_y <= self.winfo_height() - 1):
             mouse_rel_pos = (mouse_x, mouse_y)
@@ -250,25 +252,30 @@ class TopView(tk.Canvas):
         if self._grid_on:
             self._drawings_ids.append(self.create_image((0, 0), image=self._grid, anchor=tk.NW))
 
-    def _on_drag(self, _event):
+    def _on_drag(self, event):
         self._dragging = True
-        self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(self._half_length)
+        self.scan_dragto(event.x, event.y, gain=1)
+
 
     def _on_mouse_move(self, _event):
-        self.redraw(self._active_editor)
+        if not self._dragging:
+            self.redraw(self._active_editor)
 
     def _on_notification(self, observable, event_type, event_info):
         """Notifications comming from funnel and structure editors"""
         self._active_editor = observable
-        self.redraw(observable)
+        #self.redraw(observable)
 
-    def _on_left_click(self, event):
+    def _on_click(self, event):
+        self.scan_mark(event.x, event.y)
+
+    def _on_left_release(self, event):
         """Send to the active editor the coordinates of a mouse click, in funnel coordinates"""
         if self._dragging:
             self._dragging = False
             return
         if self._active_editor is not None:
-            self._active_editor.update_to_coord(self._canvas_to_funnel((event.x, event.y)))
+            self._active_editor.update_to_coord(self._canvas_to_funnel((event.x + self.canvasx(0), event.y + self.canvasy(0))))
 
     def switch_grid(self, grid_on):
         """Add or remove the grid according to the state of grid_on"""
