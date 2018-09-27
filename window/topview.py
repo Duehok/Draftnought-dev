@@ -38,10 +38,11 @@ class TopView(tk.Canvas):
                            relief="ridge", cursor="crosshair")
 
         self.command_stack = command_stack
+        self._half_length = ship_data.half_length
 
         self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(ship_data.half_length)
 
-        self._display_hull(parameters.hulls_shapes[ship_data.ship_type], ship_data.half_length)
+        self._display_hull(parameters.hulls_shapes[ship_data.ship_type], self._half_length)
         self._drawings_ids = []
         self._active_editor = None
 
@@ -60,10 +61,13 @@ class TopView(tk.Canvas):
         self._grid_on = False
 
         self.redraw()
+
+        self._dragging = False
         self.bind("<Motion>", self._on_mouse_move)
+        self.bind("<B1-Motion>", self._on_drag)
         self.bind("<Enter>", self._on_mouse_move)
         self.bind("<Leave>", self._on_mouse_move)
-        self.bind("<Button-1>", self._on_left_click)
+        self.bind("<ButtonRelease-1>", self._on_left_click)
 
     def make_converters(self, half_length):
         """give converters from funnel to canvas coordinates and vice-versa
@@ -79,8 +83,8 @@ class TopView(tk.Canvas):
                 canvas ti funnel
         """
         coord_factor = (self.winfo_reqwidth()/2.1)/half_length
-        xoffset = self.winfo_reqwidth()/2.0
-        yoffset = self.winfo_reqheight()/2.0
+        xoffset = self.winfo_reqwidth()/2.0 + self.canvasx(0)
+        yoffset = self.winfo_reqheight()/2.0 + self.canvasy(0)
 
         def funnel_to_canvas(point):
             """convert from funnel to canvas coordinates
@@ -246,6 +250,10 @@ class TopView(tk.Canvas):
         if self._grid_on:
             self._drawings_ids.append(self.create_image((0, 0), image=self._grid, anchor=tk.NW))
 
+    def _on_drag(self, _event):
+        self._dragging = True
+        self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(self._half_length)
+
     def _on_mouse_move(self, _event):
         self.redraw(self._active_editor)
 
@@ -256,6 +264,9 @@ class TopView(tk.Canvas):
 
     def _on_left_click(self, event):
         """Send to the active editor the coordinates of a mouse click, in funnel coordinates"""
+        if self._dragging:
+            self._dragging = False
+            return
         if self._active_editor is not None:
             self._active_editor.update_to_coord(self._canvas_to_funnel((event.x, event.y)))
 
