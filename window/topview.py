@@ -264,7 +264,7 @@ class TopView(tk.Canvas):
     def _on_notification(self, observable, event_type, event_info):
         """Notifications comming from funnel and structure editors"""
         self._active_editor = observable
-        #self.redraw(observable)
+        self.redraw(observable)
 
     def _on_click(self, event):
         self.scan_mark(event.x, event.y)
