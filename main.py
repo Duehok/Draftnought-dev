@@ -231,7 +231,7 @@ class ShipEditor(tk.Frame):
 
         views.grid(row=0, column=2, rowspan=5)
 
-        st_editors[0]._on_get_focus()
+        st_editors[0].focus_set()
 
     def set_grid(self, grid_state):
         """set the grid for both top and side view according to grid_state"""
