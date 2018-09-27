@@ -37,9 +37,8 @@ class SideView(tk.Canvas):
         image_center = (parameters.offset, round(self._image.height/2.0))
         self._image_id = self.create_image(image_center, image=self._tkimage)
         self.grid()
-        self.bind("<Motion>", self._on_move)
+        self.bind("<B1-Motion>", self._on_move)
         self.bind("<ButtonPress-1>", self._on_click)
-        self.bind("<ButtonRelease-1>", self._on_unclick)
         self._left_button_down = False
         self._half_length = ship_data.half_length
 
@@ -55,21 +54,16 @@ class SideView(tk.Canvas):
         """Mark the start of the pan
         no pan along y axis
         """
-        self._left_button_down = True
         self.scan_mark(event.x, 0)
-
-    def _on_unclick(self, _event):
-        self._left_button_down = False
 
     def _on_move(self, event):
         """If the button is down, pan the view
         no pan along y axis
         """
-        if self._left_button_down:
-            self.scan_dragto(event.x, 0, gain=1)
-            pict_coord = self.coords(self._image_id)
-            self._parameters.offset = -self.canvasx(-pict_coord[0])
-            self.refresh_grid(self._grid_on)
+        self.scan_dragto(event.x, 0, gain=1)
+        pict_coord = self.coords(self._image_id)
+        self._parameters.offset = -self.canvasx(-pict_coord[0])
+        self.refresh_grid(self._grid_on)
 
     def _on_mousewheel(self, event):
         """Mouse wheel changes the zoom"""
