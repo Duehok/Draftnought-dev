@@ -34,7 +34,7 @@ class SideView(tk.Canvas):
                          height=height,
                          cursor="fleur",
                          borderwidth=borderwidth)
-        image_center = (parameters.offset, round(self._image.height/2.0))
+        image_center = (parameters.sideview_offset, round(self._image.height/2.0))
         self._image_id = self.create_image(image_center, image=self._tkimage)
         self.grid()
         self.bind("<B1-Motion>", self._on_move)
@@ -47,7 +47,7 @@ class SideView(tk.Canvas):
         self._grid_id = -1
 
         self.bind("<MouseWheel>", self._on_mousewheel)
-        self._re_zoom(self._parameters.zoom)
+        self._re_zoom(self._parameters.sideview_zoom)
 
 
     def _on_click(self, event):
@@ -62,16 +62,16 @@ class SideView(tk.Canvas):
         """
         self.scan_dragto(event.x, 0, gain=1)
         pict_coord = self.coords(self._image_id)
-        self._parameters.offset = -self.canvasx(-pict_coord[0])
+        self._parameters.sideview_offset = -self.canvasx(-pict_coord[0])
         self.refresh_grid(self._grid_on)
 
     def _on_mousewheel(self, event):
         """Mouse wheel changes the zoom"""
         if event.delta > 0:
-            self._parameters.zoom = self._parameters.zoom*1.01
+            self._parameters.sideview_zoom = self._parameters.sideview_zoom*1.01
         else:
-            self._parameters.zoom = self._parameters.zoom*0.99
-        self._re_zoom(self._parameters.zoom)
+            self._parameters.sideview_zoom = self._parameters.sideview_zoom*0.99
+        self._re_zoom(self._parameters.sideview_zoom)
 
     def _re_zoom(self, new_zoom):
         """When changing zoom, redraw the pict to the new zoom, resize the canvas"""
@@ -83,7 +83,7 @@ class SideView(tk.Canvas):
         offset = (self.coords(self._image_id)[0], round(self.winfo_reqheight()/2.0))
         self.delete(self._image_id)
         self._image_id = self.create_image(*offset, image=self._tkimage)
-        self._parameters.offset = -self.canvasx(-self.coords(self._image_id)[0])
+        self._parameters.sideview_offset = -self.canvasx(-self.coords(self._image_id)[0])
         self.refresh_grid(self._grid_on)
 
 
