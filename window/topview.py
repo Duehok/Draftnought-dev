@@ -37,10 +37,12 @@ class TopView(tk.Canvas):
                            borderwidth=2,
                            relief="ridge", cursor="crosshair")
 
+        self._parameters = parameters
+        self._start_offset = parameters.topview_offset
         self.command_stack = command_stack
         self._half_length = ship_data.half_length
 
-        self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(ship_data.half_length)
+        self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(ship_data.half_length, self._start_offset)
 
         self._display_hull(parameters.hulls_shapes[ship_data.ship_type], self._half_length)
         self._drawings_ids = []
@@ -70,7 +72,7 @@ class TopView(tk.Canvas):
         self.bind("<ButtonPress-1>", self._on_click)
         self.bind("<ButtonRelease-1>", self._on_left_release)
 
-    def make_converters(self, half_length):
+    def make_converters(self, half_length, starting_offset):
         """give converters from funnel to canvas coordinates and vice-versa
 
         scaled so that the full length of the ship fits exactly the width of the canvas
@@ -84,8 +86,8 @@ class TopView(tk.Canvas):
                 canvas ti funnel
         """
         coord_factor = (self.winfo_reqwidth()/2.1)/half_length
-        xoffset = self.winfo_reqwidth()/2.0
-        yoffset = self.winfo_reqheight()/2.0
+        xoffset = self.winfo_reqwidth()/2.0 + starting_offset[0]
+        yoffset = self.winfo_reqheight()/2.0 + starting_offset[1]
 
         def funnel_to_canvas(point):
             """convert from funnel to canvas coordinates
@@ -255,7 +257,9 @@ class TopView(tk.Canvas):
     def _on_drag(self, event):
         self._dragging = True
         self.scan_dragto(event.x, event.y, gain=1)
-
+        new_offset = (self._start_offset[0] - self.canvasx(0), 
+                      self._start_offset[1] - self.canvasy(0))
+        self._parameters.topview_offset = new_offset
 
     def _on_mouse_move(self, _event):
         if not self._dragging:
