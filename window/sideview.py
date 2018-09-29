@@ -32,13 +32,13 @@ class SideView(tk.Canvas, Subscriber):
         self._tkimage = ImageTk.PhotoImage(self._image)
         height = min(self._tkimage.height(), _MAX_HEIGHT)
         tk.Canvas.__init__(self, parent,
-                         width=_WIDTH,
-                         height=height,
-                         cursor="fleur",
-                         borderwidth=borderwidth,
-                         xscrollincrement=1,
-                         yscrollincrement=1                        
-                         )
+                           width=_WIDTH,
+                           height=height,
+                           cursor="fleur",
+                           borderwidth=borderwidth,
+                           xscrollincrement=1,
+                           yscrollincrement=1
+                           )
 
         self.xview(tk.SCROLL, round(parameters.sideview_offset), tk.UNITS)
 

@@ -38,7 +38,7 @@ class TopView(tk.Canvas, Observable):
                            borderwidth=2,
                            relief="ridge", cursor="crosshair",
                            xscrollincrement=1,
-                           yscrollincrement=1 )
+                           yscrollincrement=1)
         Observable.__init__(self)
 
         self._parameters = parameters
@@ -259,7 +259,10 @@ class TopView(tk.Canvas, Observable):
             self._drawings_ids = self._drawings_ids + self._draw_turret(turret)
 
         if self._grid_on:
-            self._drawings_ids.append(self.create_image((self.canvasx(0), self.canvasy(0)), image=self._grid, anchor=tk.NW))
+            self._drawings_ids.append(self.create_image((self.canvasx(0),
+                                                         self.canvasy(0)),
+                                                        image=self._grid,
+                                                        anchor=tk.NW))
 
     def _on_drag(self, event):
         self._dragging = True
@@ -298,7 +301,8 @@ class TopView(tk.Canvas, Observable):
             self._dragging = False
             return
         if self._active_editor is not None:
-            self._active_editor.update_to_coord(self._canvas_to_funnel((event.x + self.canvasx(0), event.y + self.canvasy(0))))
+            self._active_editor.update_to_coord(self._canvas_to_funnel((event.x + self.canvasx(0),
+                                                                        event.y + self.canvasy(0))))
 
     def switch_grid(self, grid_on):
         """Add or remove the grid according to the state of grid_on"""
