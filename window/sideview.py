@@ -67,7 +67,6 @@ class SideView(tk.Canvas):
         no pan along y axis
         """
         self.scan_dragto(event.x, 0, gain=1)
-        pict_coord = self.coords(self._image_id)
         self._parameters.sideview_offset = self.canvasx(0)
         self.refresh_grid(self._grid_on)
 
