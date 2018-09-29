@@ -33,8 +33,14 @@ class SideView(tk.Canvas):
                          width=_WIDTH,
                          height=height,
                          cursor="fleur",
-                         borderwidth=borderwidth)
-        image_center = (parameters.sideview_offset, round(self._image.height/2.0))
+                         borderwidth=borderwidth,
+                         xscrollincrement=1,
+                         yscrollincrement=1                        
+                         )
+
+        self.xview(tk.SCROLL, round(parameters.sideview_offset), tk.UNITS)
+
+        image_center = (0, round(self._image.height/2.0))
         self._image_id = self.create_image(image_center, image=self._tkimage)
         self.grid()
         self.bind("<B1-Motion>", self._on_move)
@@ -62,7 +68,7 @@ class SideView(tk.Canvas):
         """
         self.scan_dragto(event.x, 0, gain=1)
         pict_coord = self.coords(self._image_id)
-        self._parameters.sideview_offset = -self.canvasx(-pict_coord[0])
+        self._parameters.sideview_offset = self.canvasx(0)
         self.refresh_grid(self._grid_on)
 
     def _on_mousewheel(self, event):
@@ -83,7 +89,7 @@ class SideView(tk.Canvas):
         offset = (self.coords(self._image_id)[0], round(self.winfo_reqheight()/2.0))
         self.delete(self._image_id)
         self._image_id = self.create_image(*offset, image=self._tkimage)
-        self._parameters.sideview_offset = -self.canvasx(-self.coords(self._image_id)[0])
+        self._parameters.sideview_offset = self.canvasx(0)
         self.refresh_grid(self._grid_on)
 
 
