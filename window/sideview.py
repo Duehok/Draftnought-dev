@@ -92,7 +92,6 @@ class SideView(tk.Canvas, Subscriber):
         self._parameters.sideview_offset = self.canvasx(0)
         self.refresh_grid(self._grid_on)
 
-
     def refresh_grid(self, grid_on):
         """Update the grid according to grid_on
         Resize the grid if the previous grid was too small
@@ -114,6 +113,9 @@ class SideView(tk.Canvas, Subscriber):
             self.xview(tk.SCROLL, round(event_info["x"]), tk.UNITS)
             self._parameters.sideview_offset = self.canvasx(0)
             self.refresh_grid(self._grid_on)
+        if event_type == "Apply_zoom":
+            self._parameters.sideview_zoom = self._parameters.sideview_zoom*event_info["factor"]
+            self._re_zoom(self._parameters.sideview_zoom)
 
 def make_grid(width, height, horizontal=False):
     """Build a semi-transparent grid in a picture

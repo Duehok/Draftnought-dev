@@ -281,7 +281,7 @@ class TopView(tk.Canvas, Observable):
             factor = 0.95
         self.scale("all", self.winfo_reqwidth()/2.0, self.winfo_reqheight()/2.0, factor, factor)
         self._parameters.topview_zoom = self._parameters.topview_zoom*factor
-        self._notify("apply_zoom", {"factor":factor})
+        self._notify("Apply_zoom", {"factor":factor})
         self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(self._half_length)
 
     def _on_notification(self, observable, _event_type, _event_info):
