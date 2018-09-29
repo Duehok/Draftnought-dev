@@ -4,13 +4,14 @@
 """
 import tkinter as tk
 from window.sideview import make_grid
+from window.framework import Observable
 
 _HFUNNELS_TO_HLENGTH = 0.028
 _FUNNEL_OVAL = 1.38
 _WIDTH = 701
-_HEIGHT = 201
+_HEIGHT = 301
 
-class TopView(tk.Canvas):
+class TopView(tk.Canvas, Observable):
     """Everything having to do with the area displaying the top view of the ship
 
     The ship is displayed with bow at the left
@@ -38,6 +39,7 @@ class TopView(tk.Canvas):
                            relief="ridge", cursor="crosshair",
                            xscrollincrement=1,
                            yscrollincrement=1 )
+        Observable.__init__(self)
 
         self._parameters = parameters
         self.command_stack = command_stack
@@ -75,6 +77,7 @@ class TopView(tk.Canvas):
         self.bind("<Leave>", self._on_mouse_move)
         self.bind("<ButtonPress-1>", self._on_click)
         self.bind("<ButtonRelease-1>", self._on_left_release)
+        self.bind("<MouseWheel>", self._on_mousewheel)
 
     def make_converters(self, half_length):
         """give converters from funnel to canvas coordinates and vice-versa
@@ -89,7 +92,7 @@ class TopView(tk.Canvas):
                 funnel to canvas
                 canvas ti funnel
         """
-        coord_factor = (self.winfo_reqwidth()/2.1)/half_length
+        coord_factor = (self.winfo_reqwidth()/2.1)/half_length*self._parameters.topview_zoom
         xoffset = self.winfo_reqwidth()/2.0
         yoffset = self.winfo_reqheight()/2.0
 
@@ -262,13 +265,26 @@ class TopView(tk.Canvas):
         self._dragging = True
         self.scan_dragto(event.x, event.y, gain=1)
         new_offset = (self.canvasx(0), self.canvasy(0))
+        x_move = new_offset[0] - self._parameters.topview_offset[0]
         self._parameters.topview_offset = new_offset
+        self._notify("Drag", {"x":x_move})
 
     def _on_mouse_move(self, _event):
         if not self._dragging:
             self.redraw(self._active_editor)
 
-    def _on_notification(self, observable, event_type, event_info):
+    def _on_mousewheel(self, event):
+        """Mouse wheel changes the zoom"""
+        if event.delta > 0:
+            factor = 1.05
+        else:
+            factor = 0.95
+        self.scale("all", self.winfo_reqwidth()/2.0, self.winfo_reqheight()/2.0, factor, factor)
+        self._parameters.topview_zoom = self._parameters.topview_zoom*factor
+        self._notify("apply_zoom", {"factor":factor})
+        self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(self._half_length)
+
+    def _on_notification(self, observable, _event_type, _event_info):
         """Notifications comming from funnel and structure editors"""
         self._active_editor = observable
         self.redraw(observable)

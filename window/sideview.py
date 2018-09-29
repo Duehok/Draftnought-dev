@@ -2,13 +2,14 @@
 
 import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw
+from window.framework import Subscriber
 
 _WIDTH = 701
 _MAX_HEIGHT = 5000
 _GRID_STEPS = 25
 _GRID_RGBA = (0, 0, 0, 125)
 
-class SideView(tk.Canvas):
+class SideView(tk.Canvas, Subscriber):
     """Display the side view picture if one is defined in the ship data
 
     Can pan with mouse drag
@@ -19,8 +20,9 @@ class SideView(tk.Canvas):
         shipdata (model.shipdata): shipdata that has, or does not have, a side_pict
         parameters: all the parameters for the program
     """
-    def __init__(self, parent, ship_data, parameters):
+    def __init__(self, parent, ship_data, parameters, sideview):
         self._parameters = parameters
+        Subscriber.__init__(self, sideview)
         if ship_data.side_pict:
             self._image = ship_data.side_pict
             borderwidth = 2
@@ -29,7 +31,7 @@ class SideView(tk.Canvas):
             borderwidth = 0
         self._tkimage = ImageTk.PhotoImage(self._image)
         height = min(self._tkimage.height(), _MAX_HEIGHT)
-        super().__init__(parent,
+        tk.Canvas.__init__(self, parent,
                          width=_WIDTH,
                          height=height,
                          cursor="fleur",
@@ -54,7 +56,6 @@ class SideView(tk.Canvas):
 
         self.bind("<MouseWheel>", self._on_mousewheel)
         self._re_zoom(self._parameters.sideview_zoom)
-
 
     def _on_click(self, event):
         """Mark the start of the pan
@@ -107,6 +108,12 @@ class SideView(tk.Canvas):
             self._grid_id = self.create_image((self.canvasx(0),
                                                self.canvasy(0)),
                                               image=self._grid, anchor=tk.NW)
+
+    def _on_notification(self, observable, event_type, event_info):
+        if event_type == "Drag":
+            self.xview(tk.SCROLL, round(event_info["x"]), tk.UNITS)
+            self._parameters.sideview_offset = self.canvasx(0)
+            self.refresh_grid(self._grid_on)
 
 def make_grid(width, height, horizontal=False):
     """Build a semi-transparent grid in a picture

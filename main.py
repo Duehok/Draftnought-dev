@@ -222,12 +222,12 @@ class ShipEditor(tk.Frame):
             st_editors.append(new_st_display)
 
         views = tk.Frame(self)
-        self._side_view = sideview.SideView(views, ship_data, parameters)
-        self._side_view.grid(row=0, column=0)
-
         self._top_view = topview.TopView(views, ship_data, st_editors,
                                          funnels_editors, command_stack, parameters)
         self._top_view.grid(row=1, column=0)
+
+        self._side_view = sideview.SideView(views, ship_data, parameters,self._top_view)
+        self._side_view.grid(row=0, column=0)
 
         views.grid(row=0, column=2, rowspan=5)
 
