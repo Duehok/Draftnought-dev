@@ -25,16 +25,16 @@ class SideView(tk.Canvas, Subscriber):
         Subscriber.__init__(self, sideview)
         if ship_data.side_pict:
             self._image = ship_data.side_pict
-            borderwidth = 2
+            self.borderwidth = 2
         else:
             self._image = Image.new(mode="RGBA", size=(1, 1), color=(0, 0, 0, 0))
-            borderwidth = 0
+            self.borderwidth = 0
         self._tkimage = ImageTk.PhotoImage(self._image)
         tk.Canvas.__init__(self, parent,
                            width=_WIDTH,
                            height=_HEIGHT,
                            cursor="fleur",
-                           borderwidth=borderwidth,
+                           borderwidth=self.borderwidth,
                            relief="ridge",
                            xscrollincrement=1,
                            yscrollincrement=1
@@ -86,7 +86,7 @@ class SideView(tk.Canvas, Subscriber):
         corrected_zoom = new_zoom/self._half_length
         new_size = [round(coord*corrected_zoom) for coord in  self._image.size]
         self._tkimage = ImageTk.PhotoImage(self._image.resize(new_size))
-        offset = (self.coords(self._image_id)[0], round(self.winfo_height() - self._tkimage.height()/2.0))
+        offset = (self.coords(self._image_id)[0], round(self.winfo_height() - self.borderwidth*2 - self._tkimage.height()/2.0))
         self.delete(self._image_id)
         self._image_id = self.create_image(*offset, image=self._tkimage)
         self._parameters.sideview_offset = self.canvasx(0)
