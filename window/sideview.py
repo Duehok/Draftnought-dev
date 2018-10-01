@@ -42,16 +42,18 @@ class SideView(tk.Canvas, Subscriber):
 
         self.xview(tk.SCROLL, round(parameters.sideview_offset), tk.UNITS)
 
-        image_center = (0, round(self.winfo_reqheight() - self._image.height/2.0))
+        image_center = (0, round(self.winfo_height() - self._image.height/2.0))
         self._image_id = self.create_image(image_center, image=self._tkimage)
         self.grid()
         self.bind("<B1-Motion>", self._on_move)
         self.bind("<ButtonPress-1>", self._on_click)
+        self.bind("<Configure>", self._on_resize)
+
         self._left_button_down = False
         self._half_length = ship_data.half_length
 
         self._grid_on = False
-        self._grid = make_grid(self.winfo_reqwidth(), self.winfo_reqheight())
+        self._grid = make_grid(self.winfo_width(), self.winfo_height())
         self._grid_id = -1
 
         self.bind("<MouseWheel>", self._on_mousewheel)
@@ -84,7 +86,7 @@ class SideView(tk.Canvas, Subscriber):
         corrected_zoom = new_zoom/self._half_length
         new_size = [round(coord*corrected_zoom) for coord in  self._image.size]
         self._tkimage = ImageTk.PhotoImage(self._image.resize(new_size))
-        offset = (self.coords(self._image_id)[0], round(self.winfo_reqheight() - self._image.height/2.0))
+        offset = (self.coords(self._image_id)[0], round(self.winfo_height() - self._tkimage.height()/2.0))
         self.delete(self._image_id)
         self._image_id = self.create_image(*offset, image=self._tkimage)
         self._parameters.sideview_offset = self.canvasx(0)
@@ -99,9 +101,9 @@ class SideView(tk.Canvas, Subscriber):
         if self._grid_id != -1:
             self.delete(self._grid_id)
         if grid_on:
-            if (self._grid.height() < self.winfo_reqheight() or
-                    self._grid.width() < self.winfo_reqwidth()):
-                self._grid = make_grid(self.winfo_reqwidth(), self.winfo_reqheight())
+            if (self._grid.height() < self.winfo_height() or
+                    self._grid.width() < self.winfo_width()):
+                self._grid = make_grid(self.winfo_width(), self.winfo_height())
             self._grid_id = self.create_image((self.canvasx(0),
                                                self.canvasy(0)),
                                               image=self._grid, anchor=tk.NW)
@@ -114,6 +116,9 @@ class SideView(tk.Canvas, Subscriber):
         if event_type == "Apply_zoom":
             self._parameters.sideview_zoom = self._parameters.sideview_zoom*event_info["factor"]
             self._re_zoom(self._parameters.sideview_zoom)
+
+    def _on_resize(self, event):
+        self._re_zoom(self._parameters.sideview_zoom)
 
 def make_grid(width, height, horizontal=False):
     """Build a semi-transparent grid in a picture
