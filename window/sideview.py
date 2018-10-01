@@ -57,7 +57,6 @@ class SideView(tk.Canvas, Subscriber):
         self._grid_id = -1
 
         self.bind("<MouseWheel>", self._on_mousewheel)
-        self._re_zoom(self._parameters.sideview_zoom)
 
     def _on_click(self, event):
         """Mark the start of the pan

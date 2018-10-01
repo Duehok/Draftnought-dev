@@ -9,7 +9,7 @@ from window.framework import Observable
 _HFUNNELS_TO_HLENGTH = 0.028
 _FUNNEL_OVAL = 1.38
 _WIDTH = 701
-_HEIGHT = 301
+_HEIGHT = 261
 
 class TopView(tk.Canvas, Observable):
     """Everything having to do with the area displaying the top view of the ship

@@ -197,7 +197,7 @@ RECENT_FILES_SCHEMA = (
 DEFAULT_RECENT_FILES ={}
 DEFAULT_PARAM = {
     "sideview_zoom":1.2571630183484306*257,
-    "sideview_offset":350,
+    "sideview_offset":-350,
     "grid":True,
     "topview_zoom":1.0,
     "topview_offset":(0, 0)
