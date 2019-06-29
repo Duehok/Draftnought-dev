@@ -11,6 +11,7 @@ _FUNNEL_OVAL = 1.38
 _WIDTH = 701
 _HEIGHT = 261
 
+
 class TopView(tk.Canvas, Observable):
     """Everything having to do with the area displaying the top view of the ship
 
@@ -26,6 +27,7 @@ class TopView(tk.Canvas, Observable):
         command_stack (ComandStack): the undo/redo command stack common to the whole program
         parameters (parameters_loader.Parameters): set of data to draw the ship.
     """
+
     def __init__(self, parent,
                  ship_data,
                  struct_editors,
@@ -48,9 +50,11 @@ class TopView(tk.Canvas, Observable):
         self.xview(tk.SCROLL, round(parameters.topview_offset[0]), tk.UNITS)
         self.yview(tk.SCROLL, round(parameters.topview_offset[1]), tk.UNITS)
 
-        self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(ship_data.half_length)
+        self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(
+            ship_data.half_length)
 
-        self._display_hull(parameters.hulls_shapes[ship_data.ship_type], self._half_length)
+        self._display_hull(
+            parameters.hulls_shapes[ship_data.ship_type], self._half_length)
         self._drawings_ids = []
         self._active_editor = None
 
@@ -65,7 +69,8 @@ class TopView(tk.Canvas, Observable):
 
         self._turrets = ship_data.turrets_torps
 
-        self._grid = make_grid(self.winfo_reqwidth(), self.winfo_reqheight(), horizontal=True)
+        self._grid = make_grid(self.winfo_reqwidth(),
+                               self.winfo_reqheight(), horizontal=True)
         self._grid_on = False
 
         self.redraw()
@@ -92,7 +97,8 @@ class TopView(tk.Canvas, Observable):
                 funnel to canvas
                 canvas ti funnel
         """
-        coord_factor = (self.winfo_reqwidth()/2.1)/half_length*self._parameters.topview_zoom
+        coord_factor = (self.winfo_reqwidth()/2.1) / \
+            half_length*self._parameters.topview_zoom
         xoffset = self.winfo_reqwidth()/2.0
         yoffset = self.winfo_reqheight()/2.0
 
@@ -120,7 +126,7 @@ class TopView(tk.Canvas, Observable):
             """
             if not point:
                 return []
-            return (-(point[1] - yoffset)/coord_factor, (point[0]- xoffset)/coord_factor)
+            return (-(point[1] - yoffset)/coord_factor, (point[0] - xoffset)/coord_factor)
 
         return (funnel_to_canvas, canvas_to_funnel)
 
@@ -137,7 +143,7 @@ class TopView(tk.Canvas, Observable):
             converted_points = [self._funnel_to_canvas(
                 (point[0]*half_length,
                  point[1]*half_length))
-                                for point in line]
+                for point in line]
             self.create_line(*converted_points, smooth=True, width=2)
 
     def _draw_structure(self, points, fill, selected_index=-1, mouse_xy=(-1, -1)):
@@ -161,23 +167,28 @@ class TopView(tk.Canvas, Observable):
             color = "black"
         drawing_ids = []
         if len(points) >= 2:
-            converted_points = [self._funnel_to_canvas(point) for point in points]
+            converted_points = [self._funnel_to_canvas(
+                point) for point in points]
             if fill:
                 drawing_ids.append(self.create_polygon(*converted_points,
                                                        fill="cyan", outline=color, width=2))
             else:
-                drawing_ids.append(self.create_line(*converted_points, fill=color, width=2))
+                drawing_ids.append(self.create_line(
+                    *converted_points, fill=color, width=2))
 
         if mouse_xy != (-1, -1) and selected_index != -1:
             mouse_drawing_verteces = []
             if selected_index - 1 >= 0 and points:
-                mouse_drawing_verteces.append(self._funnel_to_canvas(points[selected_index - 1]))
+                mouse_drawing_verteces.append(
+                    self._funnel_to_canvas(points[selected_index - 1]))
             mouse_drawing_verteces.append(mouse_xy)
-            if selected_index + 1 <= len(points) -1:
-                mouse_drawing_verteces.append(self._funnel_to_canvas(points[selected_index + 1]))
+            if selected_index + 1 <= len(points) - 1:
+                mouse_drawing_verteces.append(
+                    self._funnel_to_canvas(points[selected_index + 1]))
 
             if len(mouse_drawing_verteces) >= 2:
-                drawing_ids.append(self.create_line(*mouse_drawing_verteces, fill="red", width=2))
+                drawing_ids.append(self.create_line(
+                    *mouse_drawing_verteces, fill="red", width=2))
         return drawing_ids
 
     def _draw_funnel(self, position, oval, mouse_x=-1):
@@ -197,20 +208,26 @@ class TopView(tk.Canvas, Observable):
         if oval:
             delta = delta*_FUNNEL_OVAL
         if position != 0:
-            vertex1_canvas = self._funnel_to_canvas((0-self._funnel_half_width, position-delta))
-            vertex2_canvas = self._funnel_to_canvas((0+self._funnel_half_width, position+delta))
-            drawing_ids.append(self.create_oval(*vertex1_canvas, *vertex2_canvas, fill="black"))
+            vertex1_canvas = self._funnel_to_canvas(
+                (0-self._funnel_half_width, position-delta))
+            vertex2_canvas = self._funnel_to_canvas(
+                (0+self._funnel_half_width, position+delta))
+            drawing_ids.append(self.create_oval(
+                *vertex1_canvas, *vertex2_canvas, fill="black"))
 
         if mouse_x != -1:
             (__, mouse_funnel) = self._canvas_to_funnel((mouse_x, 0))
-            vertex1_canvas = self._funnel_to_canvas((0-self._funnel_half_width, mouse_funnel-delta))
-            vertex2_canvas = self._funnel_to_canvas((0+self._funnel_half_width, mouse_funnel+delta))
+            vertex1_canvas = self._funnel_to_canvas(
+                (0-self._funnel_half_width, mouse_funnel-delta))
+            vertex2_canvas = self._funnel_to_canvas(
+                (0+self._funnel_half_width, mouse_funnel+delta))
             drawing_ids.append(self.create_oval(*vertex1_canvas, *vertex2_canvas,
                                                 fill="red", stipple="gray25"))
         return drawing_ids
 
     def _draw_turret(self, turret):
-        canvas_outline = [self._funnel_to_canvas(point) for point in turret.outline]
+        canvas_outline = [self._funnel_to_canvas(
+            point) for point in turret.outline]
         return [self.create_polygon(*canvas_outline, fill="green", outline="black")]
 
     def redraw(self, active_editor=None):
@@ -247,13 +264,13 @@ class TopView(tk.Canvas, Observable):
         for editor in self._funnel_editors:
             if editor == active_editor:
                 self._drawings_ids = (self._drawings_ids
-                                      + self._draw_funnel(editor.position,
+                                      + self._draw_funnel(editor.y,
                                                           editor.oval,
                                                           mouse_rel_pos[0]))
             else:
-                if editor.position != 0:
+                if editor.y != 0:
                     self._drawings_ids = (self._drawings_ids
-                                          + self._draw_funnel(editor.position, editor.oval))
+                                          + self._draw_funnel(editor.y, editor.oval))
 
         for turret in self._turrets:
             self._drawings_ids = self._drawings_ids + self._draw_turret(turret)
@@ -268,10 +285,11 @@ class TopView(tk.Canvas, Observable):
         if self._grid_on:
             if (self._grid.height() < self.winfo_height() or
                     self._grid.width() < self.winfo_width()):
-                self._grid = make_grid(self.winfo_width(), self.winfo_height(), horizontal=True)
-            self._drawings_ids.append( self.create_image((self.canvasx(0),
-                                                self.canvasy(0)),
-                                                image=self._grid, anchor=tk.NW))
+                self._grid = make_grid(
+                    self.winfo_width(), self.winfo_height(), horizontal=True)
+            self._drawings_ids.append(self.create_image((self.canvasx(0),
+                                                         self.canvasy(0)),
+                                                        image=self._grid, anchor=tk.NW))
 
     def _on_drag(self, event):
         self._dragging = True
@@ -279,7 +297,7 @@ class TopView(tk.Canvas, Observable):
         new_offset = (self.canvasx(0), self.canvasy(0))
         x_move = new_offset[0] - self._parameters.topview_offset[0]
         self._parameters.topview_offset = new_offset
-        self._notify("Drag", {"x":x_move})
+        self._notify("Drag", {"x": x_move})
 
     def _on_mouse_move(self, _event):
         if not self._dragging:
@@ -291,10 +309,12 @@ class TopView(tk.Canvas, Observable):
             factor = 1.05
         else:
             factor = 0.95
-        self.scale("all", self.winfo_reqwidth()/2.0, self.winfo_reqheight()/2.0, factor, factor)
+        self.scale("all", self.winfo_reqwidth()/2.0,
+                   self.winfo_reqheight()/2.0, factor, factor)
         self._parameters.topview_zoom = self._parameters.topview_zoom*factor
-        self._notify("Apply_zoom", {"factor":factor})
-        self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(self._half_length)
+        self._notify("Apply_zoom", {"factor": factor})
+        self._funnel_to_canvas, self._canvas_to_funnel = self.make_converters(
+            self._half_length)
 
     def _on_notification(self, observable, _event_type, _event_info):
         """Notifications comming from funnel and structure editors"""

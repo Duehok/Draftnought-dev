@@ -14,6 +14,7 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         index (int): just a number to indicate the funnel's number. Display only
         command_stack (framework.Command_stack): undo/redo stack
     """
+
     def __init__(self, parent, funnel, index, command_stack):
         tk.Frame.__init__(self, parent, borderwidth=4, relief="raised")
         Subscriber.__init__(self, funnel)
@@ -30,7 +31,8 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         self._update()
         self.bind("<Button-1>", self._on_click)
 
-        is_active = Checkbutton(self, text=f"Funnel n°{index}:  ", variable=self._active_var)
+        is_active = Checkbutton(
+            self, text=f"Funnel n°{index}:  ", variable=self._active_var)
         is_active.grid(columnspan=3)
         is_active.bind("<FocusIn>", self._on_get_focus)
         is_active.bind("<FocusOut>", self._on_lost_focus)
@@ -48,7 +50,7 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         is_oval.grid(row=1, column=2)
         is_oval.bind("<FocusIn>", self._on_get_focus)
         is_oval.bind("<FocusOut>", self._on_lost_focus)
-        
+
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
         self.columnconfigure(2, weight=1)
@@ -69,12 +71,12 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
     def _update(self, *_args):
         """Set all the displayed info to what is in the funnel data
         """
-        #flags to avoid circular update of the values
+        # flags to avoid circular update of the values
         self._updating = True
-        self._active_var.set(int(self._funnel.position != 0))
-        self._position_var.set(round(self._funnel.position, 1))
+        self._active_var.set(int(self._funnel.y != 0))
+        self._position_var.set(round(self._funnel.y, 1))
         self._oval_var.set(self._funnel.oval)
-        self._notify("Update", {"Position":self.position, "Oval": self.oval})
+        self._notify("Update", {"Position": self.y, "Oval": self.oval})
         self._updating = False
 
     def _set_position(self, _var_name, _list_index, _operation):
@@ -89,9 +91,11 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         """
         if not self._updating:
             if not bool(self._active_var.get()):
-                self._command_stack.do(model.funnel.MoveFunnel(self._funnel, 0))
+                self._command_stack.do(
+                    model.funnel.MoveFunnel(self._funnel, 0))
             else:
-                self._command_stack.do(model.funnel.MoveFunnel(self._funnel, 1))
+                self._command_stack.do(
+                    model.funnel.MoveFunnel(self._funnel, 1))
 
     def _switch_oval(self, _var_name, _list_index, _operation):
         """Called when switching the funnel from oval to circular and vice-versa
@@ -115,6 +119,11 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         return self._funnel.oval
 
     @property
-    def position(self):
+    def y(self):
         """Pipe throught the funnel's data state"""
-        return self._funnel.position
+        return self._funnel.y
+
+    @property
+    def x(self):
+        """Pipe throught the funnel's data state"""
+        return self._funnel.x

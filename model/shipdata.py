@@ -6,15 +6,7 @@ from math import pi
 from PIL import Image
 from model.structure import Structure
 from model.turrets_torps import Turret, Torpedo
-from model.funnel import funnels_as_ini_section, parse_funnels
-
-# superstructures and funnels have different coordinates system
-# I decide to use the funnel
-# might be a bad idea
-STRUCTURE_TO_FUNNEL = 1.0/45.0
-
-# To convert the angle's value in superstructure's points to radiants
-ANGLE_TO_RADS = pi/972000000.0
+from model.funnel import funnels_as_ini_section, parse_funnels, ANGLE_TO_RADS, STRUCTURE_TO_FUNNEL
 
 # to set up the display if starting without loading a file
 DEFAULT_HALF_LENGTH = 200
@@ -70,7 +62,10 @@ class ShipData:
                             self.path.resolve(), message=message)
 
         caliber = self._parser['Guns'].getint('Main')
-        rtw2 = 'FlightDeck' in self._parser['Data']
+
+        # only rtw2 ships can have a flight deck, so it's used to detect rtw1 or rtw2 files
+        self.is_rtw2 = 'FlightDeck' in self._parser['Data']
+
         # No length data in the ship file, length is determined from tonnage and ship type
         # reverse-engineered from in game ships
         self.ship_type = self._parser['Data']['ShipType']
@@ -101,7 +96,7 @@ class ShipData:
         self.turrets_torps = [Turret(caliber, k, v, self.half_length, turret_data, parameters)
                               for k, v in turret_data.items()] + torps
 
-        self.funnels = parse_funnels(self._parser["Funnels"])
+        self.funnels = parse_funnels(self._parser["Funnels"], self.is_rtw2)
 
         if self._parser["Data"]["PictureName"] is not None:
             pict_path = self.path.parent.joinpath(
@@ -126,7 +121,8 @@ class ShipData:
         for struct in self.structures:
             self._parser[struct.name] = struct.as_ini_section()
 
-        self._parser["Funnels"] = funnels_as_ini_section(self.funnels)
+        self._parser["Funnels"] = funnels_as_ini_section(
+            self.funnels, self.is_rtw2)
         if file_path is not None:
             with open(file_path, "w") as file:
                 self._parser.write(file, space_around_delimiters=False)
