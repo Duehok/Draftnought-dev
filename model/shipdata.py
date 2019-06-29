@@ -70,6 +70,7 @@ class ShipData:
                             self.path.resolve(), message=message)
 
         caliber = self._parser['Guns'].getint('Main')
+        rtw2 = 'FlightDeck' in self._parser['Data']
         # No length data in the ship file, length is determined from tonnage and ship type
         # reverse-engineered from in game ships
         self.ship_type = self._parser['Data']['ShipType']
