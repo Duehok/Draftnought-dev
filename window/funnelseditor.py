@@ -23,8 +23,12 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         self._command_stack = command_stack
         self._active_var = tk.IntVar()
         self._active_var.trace_add("write", self._switch_active)
-        self._position_var = tk.StringVar()
-        self._position_var.trace_add("write", self._set_position)
+        self._y_var = tk.StringVar()
+        self._y_var.set(0)
+        self._y_var.trace_add("write", self._set_position)
+        self._x_var = tk.StringVar()
+        self._x_var.set(0)
+        self._x_var.trace_add("write", self._set_position)
         self._oval_var = tk.IntVar()
         self._oval_var.trace_add("write", self._switch_oval)
 
@@ -37,14 +41,23 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         is_active.bind("<FocusIn>", self._on_get_focus)
         is_active.bind("<FocusOut>", self._on_lost_focus)
 
-        pos_label = Label(self, text="  Position: ")
-        pos_label.grid(sticky=tk.E)
-        pos_label.bind("<Button-1>", self._on_click)
+        x_label = Label(self, text="\u21d5", anchor=tk.CENTER)
+        x_label.grid(sticky=tk.E + tk.W)
+        x_label.bind("<Button-1>", self._on_click)
 
-        self._pos_entry = Entry(self, textvariable=self._position_var, width=6)
-        self._pos_entry.grid(row=1, column=1, sticky=tk.W)
-        self._pos_entry.bind("<FocusIn>", self._on_get_focus)
-        self._pos_entry.bind("<FocusOut>", self._on_lost_focus)
+        self.x_entry = Entry(self, textvariable=self._x_var, width=6)
+        self.x_entry.grid(row=2, column=0, sticky=tk.W + tk.E)
+        self.x_entry.bind("<FocusIn>", self._on_get_focus)
+        self.x_entry.bind("<FocusOut>", self._on_lost_focus)
+
+        y_label = Label(self, text="\u21d4", anchor=tk.CENTER)
+        y_label.grid(row=1, column=1, sticky=tk.E+tk.W)
+        y_label.bind("<Button-1>", self._on_click)
+
+        self.y_entry = Entry(self, textvariable=self._y_var, width=6)
+        self.y_entry.grid(row=2, column=1, sticky=tk.W + tk.E)
+        self.y_entry.bind("<FocusIn>", self._on_get_focus)
+        self.y_entry.bind("<FocusOut>", self._on_lost_focus)
 
         is_oval = Checkbutton(self, text="Is Oval", variable=self._oval_var)
         is_oval.grid(row=1, column=2)
@@ -56,7 +69,7 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         self.columnconfigure(2, weight=1)
 
     def _on_click(self, _event):
-        self._pos_entry.focus_set()
+        self.x_entry.focus_set()
 
     def _on_notification(self, observable, event_type, event_info):
         self._update()
@@ -74,17 +87,19 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         # flags to avoid circular update of the values
         self._updating = True
         self._active_var.set(int(self._funnel.y != 0))
-        self._position_var.set(round(self._funnel.y, 1))
+        self._y_var.set(round(self._funnel.y, 1))
+        self._x_var.set(round(self._funnel.x, 1))
         self._oval_var.set(self._funnel.oval)
-        self._notify("Update", {"Position": self.y, "Oval": self.oval})
+        self._notify(
+            "Update", {"Position": [self.x, self.y], "Oval": self.oval})
         self._updating = False
 
     def _set_position(self, _var_name, _list_index, _operation):
         """Called when the position of a funnel is modified
         """
-        if not self._updating and is_int(self._position_var.get()):
-            self._command_stack.do(model.funnel.MoveFunnel(self._funnel, 0,
-                                                           int(self._position_var.get())))
+        if not self._updating and is_int(self._x_var.get()) and is_int(self._y_var.get()):
+            self._command_stack.do(model.funnel.MoveFunnel(self._funnel, int(self._x_var.get()),
+                                                           int(self._y_var.get())))
 
     def _switch_active(self, _var_name, _list_index, _operation):
         """Called when switching the funnel on and off
