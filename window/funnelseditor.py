@@ -1,8 +1,8 @@
 """Everything to edit the funnels"""
 
 import tkinter as tk
-from tkinter.ttk import Checkbutton, Entry, Label
-from window.framework import Subscriber, Observable, is_int
+from tkinter.ttk import Checkbutton, Entry, Label, Button
+from window.framework import Subscriber, Observable, is_float
 import model.funnel
 
 
@@ -21,14 +21,18 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         Observable.__init__(self)
         self._funnel = funnel
         self._command_stack = command_stack
+
         self._active_var = tk.IntVar()
         self._active_var.trace_add("write", self._switch_active)
+
         self._y_var = tk.StringVar()
         self._y_var.set(0)
         self._y_var.trace_add("write", self._set_position)
+
         self._x_var = tk.StringVar()
         self._x_var.set(0)
         self._x_var.trace_add("write", self._set_position)
+
         self._oval_var = tk.IntVar()
         self._oval_var.trace_add("write", self._switch_oval)
 
@@ -64,6 +68,10 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         is_oval.bind("<FocusIn>", self._on_get_focus)
         is_oval.bind("<FocusOut>", self._on_lost_focus)
 
+        force_centerline = Button(
+            self, text="force on centerline", command=self._force_centerline)
+        force_centerline.grid(row=2, column=2)
+
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
         self.columnconfigure(2, weight=1)
@@ -97,9 +105,9 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
     def _set_position(self, _var_name, _list_index, _operation):
         """Called when the position of a funnel is modified
         """
-        if not self._updating and is_int(self._x_var.get()) and is_int(self._y_var.get()):
-            self._command_stack.do(model.funnel.MoveFunnel(self._funnel, int(self._x_var.get()),
-                                                           int(self._y_var.get())))
+        if not self._updating and is_float(self._x_var.get()) and is_float(self._y_var.get()):
+            self._command_stack.do(model.funnel.MoveFunnel(self._funnel, float(self._x_var.get()),
+                                                           float(self._y_var.get())))
 
     def _switch_active(self, _var_name, _list_index, _operation):
         """Called when switching the funnel on and off
@@ -127,6 +135,9 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         """
         self._command_stack.do(model.funnel.MoveFunnel(self._funnel, point[0],
                                                        point[1]))
+
+    def _force_centerline(self):
+        self._x_var.set(0)
 
     @property
     def oval(self):

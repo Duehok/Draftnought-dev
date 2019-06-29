@@ -4,12 +4,13 @@ import tkinter as tk
 from tkinter.ttk import Treeview, Scrollbar, Entry, Label, Checkbutton, Button, Style
 import model.shipdata
 import model.structure
-from window.framework import Subscriber, Observable
+from window.framework import Subscriber, Observable, is_float
 
 VISIBLE_POINTS = 10
 EDIT_ZONE_COL = 0
 POINTS_TABLE_COL = EDIT_ZONE_COL+1
 SCROLL_COL = POINTS_TABLE_COL+1
+
 
 class StructEditor(tk.Frame, Subscriber, Observable):
     """Displays and allow editing of the coordinates and points of one superstructure
@@ -18,6 +19,7 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         parent (tk.Frame): widget that is the parent of the editor
         structure (model.structure.Structure): the ship superstructure that will be edited
     """
+
     def __init__(self, parent, structure, command_stack):
         Subscriber.__init__(self, structure)
         Observable.__init__(self)
@@ -29,8 +31,9 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         self.bind("<FocusIn>", self._on_get_focus)
         self.bind("<FocusOut>", self._on_lost_focus)
 
-        self._tree = Treeview(self, columns=["#", "X", "Y"], selectmode="browse")
-        #kill the icon column
+        self._tree = Treeview(
+            self, columns=["#", "X", "Y"], selectmode="browse")
+        # kill the icon column
         self._tree.column("#0", minwidth=0, width=0)
 
         style = Style()
@@ -57,7 +60,8 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         self._index_of_sel_point = -1
         self._fill_tree()
 
-        self._edit_zone = EditZone(self, self._structure, command_stack, self._on_get_focus)
+        self._edit_zone = EditZone(
+            self, self._structure, command_stack, self._on_get_focus)
         self._edit_zone.grid(column=EDIT_ZONE_COL, row=0, sticky=tk.N)
 
     def _set_selection(self, new_sel_index):
@@ -66,7 +70,7 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         Gives correct focus, update, etc to the editor's widgets
         if the index is outside of the self.points, does nothing
         """
-        if new_sel_index >= 0 and new_sel_index <= len(self.points) -1:
+        if new_sel_index >= 0 and new_sel_index <= len(self.points) - 1:
             iid = self._tree.get_children()[new_sel_index]
             self._tree.selection_set(iid)
 
@@ -90,7 +94,8 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         """
         selected_iid = self._tree.selection()
         self._index_of_sel_point = self._tree.index(selected_iid)
-        self._edit_zone.set_editable_point(self._tree.item(selected_iid)["values"][0])
+        self._edit_zone.set_editable_point(
+            self._tree.item(selected_iid)["values"][0])
         self._notify("focus", {})
 
     def _fill_tree(self):
@@ -98,7 +103,8 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         """
         self._tree.delete(*self._tree.get_children())
         for point_index, point in enumerate(self._structure.points):
-            self._tree.insert('', 'end', values=[point_index, round(point[0]), round(point[1])])
+            self._tree.insert('', 'end', values=[
+                              point_index, round(point[0]), round(point[1])])
             if point_index == self._index_of_sel_point:
                 self._set_selection(point_index)
 
@@ -154,6 +160,7 @@ class StructEditor(tk.Frame, Subscriber, Observable):
         """
         return self._index_of_sel_point
 
+
 class EditZone(tk.Frame):
     """The data in the treeview cannot be edited in place, so there is an area for editable fields
 
@@ -195,9 +202,9 @@ class EditZone(tk.Frame):
         y_label = Label(self, text="\u21d4:")
         y_label.grid(row=EditZone._Y_ROW, column=0, sticky=tk.E)
         y_label.bind("<Button-1>", on_get_focus)
-        #the updating_ booleans allow to detect if the stringvars are edited
-        #because the point is selected
-        #or if the user changed their value
+        # the updating_ booleans allow to detect if the stringvars are edited
+        # because the point is selected
+        # or if the user changed their value
         self.inhibit_callbacks = True
         self.editable_x = tk.StringVar()
         self.editable_y = tk.StringVar()
@@ -230,8 +237,8 @@ class EditZone(tk.Frame):
             y (number): y coordinate of the point
         """
         self._point_index = point_index
-        #flags: the stringvar will change because the point is selected
-        #checked in the callback to only modify the structure if the user edits the fields
+        # flags: the stringvar will change because the point is selected
+        # checked in the callback to only modify the structure if the user edits the fields
         self.inhibit_callbacks = True
 
         self._point_index_var.set(f"Vertex {self._point_index}")
@@ -254,14 +261,15 @@ class EditZone(tk.Frame):
 
         the args are there only to swallow the events' params
         """
-        #update the point only if:
-        #- the user edited the var (not just a point selection)
-        #- the input string can be parsed to ints
+        # update the point only if:
+        # - the user edited the var (not just a point selection)
+        # - the input string can be parsed to ints
         if (not self.inhibit_callbacks and
                 is_float(self.editable_x.get()) and is_float(self.editable_y.get())):
             self.command_stack.do(model.structure.UpdatePoint(self._structure,
                                                               self._point_index,
-                                                              float(self.editable_x.get()),
+                                                              float(
+                                                                  self.editable_x.get()),
                                                               float(self.editable_y.get())))
 
     def _set_fill(self, _var_name, _list_index, _operation):
@@ -270,7 +278,8 @@ class EditZone(tk.Frame):
         Update the structure with the new state
         the args are there only to swallow the events' params
         """
-        self.command_stack.do(model.structure.SetFill(self._structure, bool(self._fill_var.get())))
+        self.command_stack.do(model.structure.SetFill(
+            self._structure, bool(self._fill_var.get())))
 
     def _delete_point(self):
         """Called when the user delete a point
@@ -279,7 +288,8 @@ class EditZone(tk.Frame):
         the parameters are there only to swallow the events' params
         """
         if self._point_index >= 0 and self._point_index < len(self._structure.points):
-            self.command_stack.do(model.structure.DeletePoint(self._structure, self._point_index))
+            self.command_stack.do(model.structure.DeletePoint(
+                self._structure, self._point_index))
 
     def _add_point(self):
         """Called when the user delete a point
@@ -287,20 +297,9 @@ class EditZone(tk.Frame):
         Update the structure
         the parameters are there only to swallow the events' params
         """
-        self.command_stack.do(model.structure.AddPoint(self._structure, self._point_index+1, 0, 0))
+        self.command_stack.do(model.structure.AddPoint(
+            self._structure, self._point_index+1, 0, 0))
 
     def _apply_symmetry(self):
         """Make the whole structure symmetrical"""
         self.command_stack.do(model.structure.ApplySymmetry(self._structure))
-
-def is_float(possible_number):
-    """Returns true if the passed string can be parsed to a float, false if not
-
-    Args:
-    possible_number (str):
-    """
-    try:
-        float(possible_number)
-        return True
-    except ValueError:
-        return False

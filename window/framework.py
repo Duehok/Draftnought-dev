@@ -1,12 +1,14 @@
 """Helper classes for everybody"""
 from abc import ABC, abstractmethod
 
+
 class Command(ABC):
     """base class for the commands
 
     used to implemnt undo/redo queues
     Subclasses must implement the execute() and undo() methods
     """
+
     def __init__(self):
         pass
 
@@ -20,8 +22,10 @@ class Command(ABC):
         """undo the command"""
         pass
 
+
 class CommandStack:
     """Undo/redo stacks for command pattern"""
+
     def __init__(self):
         self._undo_stack = []
         self._redo_stack = []
@@ -56,8 +60,10 @@ class CommandStack:
             self._undo_stack.append(command)
             command.execute()
 
+
 class Observable:
     """Observable for the observer pattern"""
+
     def __init__(self):
         self._subscribers = []
 
@@ -77,7 +83,7 @@ class Observable:
         def _unsubscribe():
             """The callback won't receives the subscriptions anymore
             """
-            #TODO: test this!
+            # TODO: test this!
             self._subscribers.remove(callback)
 
         return _unsubscribe
@@ -93,12 +99,14 @@ class Observable:
         for call in self._subscribers:
             call(self, event_type, event_info)
 
+
 class Subscriber(ABC):
     """Subscriber for the observer pattern
 
     Args:
         observable: an object whose class inherits Observable
     """
+
     def __init__(self, observable):
         self.unsubscribe = observable.subscribe(self._on_notification)
 
@@ -114,6 +122,7 @@ class Subscriber(ABC):
         """
         pass
 
+
 def is_int(possible_number):
     """Returns true if the passed string can be parsed to an int, false if not
 
@@ -122,6 +131,19 @@ def is_int(possible_number):
     """
     try:
         int(possible_number)
+        return True
+    except ValueError:
+        return False
+
+
+def is_float(possible_number):
+    """Returns true if the passed string can be parsed to a float, false if not
+
+    Args:
+    possible_number (str):
+    """
+    try:
+        float(possible_number)
         return True
     except ValueError:
         return False
