@@ -135,7 +135,7 @@ def funnels_as_ini_section(funnels, is_rtw2):
 
     else:
         for name, funnel in funnels.items():
-            section_content[name + "Pos"] = round(funnel.position)
+            section_content[name + "Pos"] = round(funnel.y)
         for name, funnel in funnels.items():
             section_content[name+"Oval"] = 1 if funnel.oval else 0
     return section_content
