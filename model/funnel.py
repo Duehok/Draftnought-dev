@@ -126,19 +126,18 @@ def funnels_as_ini_section(funnels, is_rtw2):
     section_content = {}
     if (is_rtw2):
         for name, funnel in funnels.items():
+            angle = int(atan2(-funnel.x, -funnel.y) * 1.0/ANGLE_TO_RADS)
+            section_content[name+"Angle"] = round(angle)
+            distance = int(
+                sqrt(pow(funnel.x, 2) + pow(funnel.y, 2))/STRUCTURE_TO_FUNNEL)
+            section_content[name+"Distance"] = round(distance)
             section_content[name+"Oval"] = 1 if funnel.oval else 0
-        for name, funnel in funnels.items():
-            if funnel.oval:
-                section_content[name+"Oval"] = 1
 
     else:
         for name, funnel in funnels.items():
             section_content[name + "Pos"] = round(funnel.position)
         for name, funnel in funnels.items():
-            if funnel.oval:
-                section_content[name+"Oval"] = 1
-            else:
-                section_content[name+"Oval"] = 0
+            section_content[name+"Oval"] = 1 if funnel.oval else 0
     return section_content
 
 
