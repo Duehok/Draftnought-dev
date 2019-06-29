@@ -191,7 +191,7 @@ class TopView(tk.Canvas, Observable):
                     *mouse_drawing_verteces, fill="red", width=2))
         return drawing_ids
 
-    def _draw_funnel(self, position, oval, mouse_x=-1):
+    def _draw_funnel(self, x, y, oval, mouse_x=-1, mouse_y=-1):
         """Draw one funnel on the canvas
 
         If the funnel is active, draws the potential new outline to the cursor position
@@ -207,20 +207,21 @@ class TopView(tk.Canvas, Observable):
         delta = self._funnel_half_width
         if oval:
             delta = delta*_FUNNEL_OVAL
-        if position != 0:
+        if x != 0 or y != 0:
             vertex1_canvas = self._funnel_to_canvas(
-                (0-self._funnel_half_width, position-delta))
+                (x-self._funnel_half_width, y-delta))
             vertex2_canvas = self._funnel_to_canvas(
-                (0+self._funnel_half_width, position+delta))
+                (x+self._funnel_half_width, y+delta))
             drawing_ids.append(self.create_oval(
                 *vertex1_canvas, *vertex2_canvas, fill="black"))
 
-        if mouse_x != -1:
-            (__, mouse_funnel) = self._canvas_to_funnel((mouse_x, 0))
+        if mouse_x != -1 and mouse_y != -1:
+            (mouse_funnel_x, mouse_funnel_y) = self._canvas_to_funnel(
+                (mouse_x, mouse_y))
             vertex1_canvas = self._funnel_to_canvas(
-                (0-self._funnel_half_width, mouse_funnel-delta))
+                (mouse_funnel_x-self._funnel_half_width, mouse_funnel_y-delta))
             vertex2_canvas = self._funnel_to_canvas(
-                (0+self._funnel_half_width, mouse_funnel+delta))
+                (mouse_funnel_x+self._funnel_half_width, mouse_funnel_y+delta))
             drawing_ids.append(self.create_oval(*vertex1_canvas, *vertex2_canvas,
                                                 fill="red", stipple="gray25"))
         return drawing_ids
@@ -264,13 +265,14 @@ class TopView(tk.Canvas, Observable):
         for editor in self._funnel_editors:
             if editor == active_editor:
                 self._drawings_ids = (self._drawings_ids
-                                      + self._draw_funnel(editor.y,
+                                      + self._draw_funnel(editor.x, editor.y,
                                                           editor.oval,
-                                                          mouse_rel_pos[0]))
+                                                          mouse_rel_pos[0],
+                                                          mouse_rel_pos[1]))
             else:
                 if editor.y != 0:
                     self._drawings_ids = (self._drawings_ids
-                                          + self._draw_funnel(editor.y, editor.oval))
+                                          + self._draw_funnel(editor.x, editor.y, editor.oval))
 
         for turret in self._turrets:
             self._drawings_ids = self._drawings_ids + self._draw_turret(turret)
