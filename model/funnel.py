@@ -17,9 +17,11 @@ class Funnel(Observable):
     Contrary to the other ship parts, not generated from the file's data but from passed parameters
     Args:
         oval=False: round or oval funnel
+        TODO
         position=0: funnel position on the vertical axis. 0 is the center of the ship.
     Attrs:
         oval: if the funnel should be displayed as an oval, or not
+        TODO
         position: Position of the funnel along the length of the ship, in funnel coordinates
     """
 
@@ -66,7 +68,7 @@ class MoveFunnel(Command):
 
     Args:
     TODO
-        funnel: funnel tha moves
+        funnel: funnel that moves
         position: new position in funnel coordinates
     """
 

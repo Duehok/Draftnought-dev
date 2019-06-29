@@ -83,7 +83,7 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         """Called when the position of a funnel is modified
         """
         if not self._updating and is_int(self._position_var.get()):
-            self._command_stack.do(model.funnel.MoveFunnel(self._funnel,
+            self._command_stack.do(model.funnel.MoveFunnel(self._funnel, 0,
                                                            int(self._position_var.get())))
 
     def _switch_active(self, _var_name, _list_index, _operation):
@@ -110,7 +110,7 @@ class FunnelEditor(tk.Frame, Subscriber, Observable):
         Intended to be called from click on the top view
         point in funnel coordinates
         """
-        self._command_stack.do(model.funnel.MoveFunnel(self._funnel,
+        self._command_stack.do(model.funnel.MoveFunnel(self._funnel, point[0],
                                                        point[1]))
 
     @property
