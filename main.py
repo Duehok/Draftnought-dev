@@ -18,7 +18,8 @@ import parameters_loader
 summary = logging.getLogger("Summary")
 summary.setLevel(logging.DEBUG)
 
-log_filename = pathlib.Path(appdirs.user_data_dir("Draftnought")).joinpath("log.txt")
+log_filename = pathlib.Path(appdirs.user_data_dir(
+    "Draftnought")).joinpath("log.txt")
 if not log_filename.exists():
     log_filename.parent.mkdir(parents=True, exist_ok=True)
 details = logging.getLogger("Details")
@@ -29,10 +30,12 @@ details.addHandler(file_handler)
 
 _MAIN_ROW = 0
 
-_LOG_ROW = _MAIN_ROW +1
+_LOG_ROW = _MAIN_ROW + 1
+
 
 class MainWindow(tk.Tk):
     """Base class for the whole UI"""
+
     def __init__(self):
         super().__init__()
         self.winfo_toplevel().title("Draftnought")
@@ -43,7 +46,8 @@ class MainWindow(tk.Tk):
         logging_frame = tk.Frame(self)
         log_scroll = tk.Scrollbar(logging_frame)
         log_scroll.grid(row=0, column=1, sticky=tk.N+tk.S)
-        logging_text = Text(logging_frame, height=6, wrap=tk.WORD, yscrollcommand=log_scroll.set)
+        logging_text = Text(logging_frame, height=6,
+                            wrap=tk.WORD, yscrollcommand=log_scroll.set)
         logging_text.grid(row=0, column=0, sticky=tk.W+tk.E)
         logging_frame.grid_columnconfigure(0, weight=1)
         log_scroll.config(command=logging_text.yview)
@@ -58,14 +62,19 @@ class MainWindow(tk.Tk):
         self.config(menu=menubar)
 
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label='Open File', command=self.do_load, accelerator="Ctrl+O")
+        filemenu.add_command(
+            label='Open File', command=self.do_load, accelerator="Ctrl+O")
         filemenu.add_separator()
-        filemenu.add_command(label='Save as', command=self.do_save_as, accelerator="Ctrl+Shift+S")
-        filemenu.add_command(label='Save', command=self.do_save, accelerator="Ctrl+S")
+        filemenu.add_command(
+            label='Save as', command=self.do_save_as, accelerator="Ctrl+Shift+S")
+        filemenu.add_command(
+            label='Save', command=self.do_save, accelerator="Ctrl+S")
 
         editmenu = tk.Menu(menubar, tearoff=0)
-        editmenu.add_command(label='Undo', command=self.do_undo, accelerator="Ctrl+Z")
-        editmenu.add_command(label='Redo', command=self.do_redo, accelerator="Ctrl+Y")
+        editmenu.add_command(
+            label='Undo', command=self.do_undo, accelerator="Ctrl+Z")
+        editmenu.add_command(
+            label='Redo', command=self.do_redo, accelerator="Ctrl+Y")
 
         viewmenu = tk.Menu(menubar, tearoff=0)
         self.grid_var = tk.IntVar()
@@ -83,7 +92,8 @@ class MainWindow(tk.Tk):
         self.bind("<Control-z>", self.do_undo)
         self.bind("<Control-y>", self.do_redo)
 
-        self.center_frame = ttk.Button(self, text="Load ship file", command=self.do_load)
+        self.center_frame = ttk.Button(
+            self, text="Load ship file", command=self.do_load)
         self.center_frame.grid(row=_MAIN_ROW)
 
         try:
@@ -130,7 +140,7 @@ class MainWindow(tk.Tk):
                 If none is given, a dialog box is opened to choose it.
         """
         summary.debug("loading %s", path)
-        #save old parameters in case something goes wrong
+        # save old parameters in case something goes wrong
         old_parameters = self.parameters
         self.parameters = parameters_loader.Parameters(path)
         try:
@@ -146,18 +156,19 @@ class MainWindow(tk.Tk):
 
         summary.info("loading successful!")
         self.center_frame.destroy()
-        #reset the command stack
+        # reset the command stack
         new_command_stack = CommandStack()
         self.center_frame = ShipEditor(self,
                                        self.current_ship_data,
                                        new_command_stack,
                                        self.parameters)
-        self.center_frame.grid(row=_MAIN_ROW, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
+        self.center_frame.grid(row=_MAIN_ROW, column=0,
+                               sticky=tk.N+tk.E+tk.S+tk.W)
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(_MAIN_ROW, weight=1)
         self.resizable(True, True)
 
-        #if load was OK, forget the old command stack
+        # if load was OK, forget the old command stack
         self.command_stack = new_command_stack
         self.grid_var.set(int(self.parameters.grid))
         self.winfo_toplevel().title(pathlib.Path(path).name)
@@ -177,8 +188,10 @@ class MainWindow(tk.Tk):
                 return
             extension = pathlib.Path(current_file_path).suffix
             file = filedialog.asksaveasfile(defaultextension=extension,
-                                            initialdir=pathlib.Path(current_file_path).parent,
-                                            initialfile=pathlib.Path(current_file_path).name,
+                                            initialdir=pathlib.Path(
+                                                current_file_path).parent,
+                                            initialfile=pathlib.Path(
+                                                current_file_path).name,
                                             filetypes=(("ship files", extension),
                                                        ("all files", "*.*")))
             if file is not None:
@@ -199,6 +212,7 @@ class MainWindow(tk.Tk):
             summary.info("save successful!")
             self.parameters.write_app_param(file.name)
 
+
 class ShipEditor(tk.Frame):
     """class for the display of the whole editor
 
@@ -210,40 +224,63 @@ class ShipEditor(tk.Frame):
         command_stack (CommandStack): the  redo/undo  command stack common to the whole program
         parameters (parameters_loader.Parameters): all the parameters for the app and the ship data
     """
+
     def __init__(self, parent, ship_data, command_stack, parameters):
         super().__init__(parent)
         funnels_editors = []
         for index, funnel in enumerate(ship_data.funnels.values()):
-            funnel_editor = funnelseditor.FunnelEditor(self, funnel, index, command_stack)
-            funnel_editor.grid(row=(index//2)+1, column=index%2, sticky=tk.W+tk.E)
+            funnel_editor = funnelseditor.FunnelEditor(
+                self, funnel, index, command_stack)
+            funnel_editor.grid(row=(index//2)+1, column=index %
+                               2, sticky=tk.W+tk.E)
             funnels_editors.append(funnel_editor)
-        st_editors = []
+        self._st_editors = []
         for index, structure in enumerate(ship_data.structures):
-            new_st_display = structeditor.StructEditor(self, structure, command_stack)
-            new_st_display.grid(row=(index//2)+3, column=index%2)
-            st_editors.append(new_st_display)
+            new_st_display = structeditor.StructEditor(
+                self, structure, command_stack)
+            new_st_display.grid(row=3, column=1)
+            new_st_display.grid_remove()
+            self._st_editors.append(new_st_display)
+
+        struct_names_list = [s.name for s in ship_data.structures]
+        struct_names_var = tk.StringVar(value=struct_names_list)
+        self._superstructure_listing = tk.Listbox(
+            self, height=6, listvariable=struct_names_var, activestyle=tk.NONE)
+        self._superstructure_listing.grid(
+            row=3, column=0, sticky=tk.E+tk.W)
+        self._superstructure_listing.bind(
+            '<<ListboxSelect>>', self._on_select_superstructure)
 
         views = tk.Frame(self)
-        self._top_view = topview.TopView(views, ship_data, st_editors,
+        self._top_view = topview.TopView(views, ship_data, self._st_editors,
                                          funnels_editors, command_stack, parameters)
         self._top_view.grid(row=1, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
 
-        self._side_view = sideview.SideView(views, ship_data, parameters, self._top_view)
+        self._side_view = sideview.SideView(
+            views, ship_data, parameters, self._top_view)
         self._side_view.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
         views.columnconfigure(0, weight=1)
         views.rowconfigure(0, weight=1)
         views.rowconfigure(1, weight=1)
 
         views.grid(row=0, column=2, rowspan=5, sticky=tk.N+tk.W+tk.S+tk.E)
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(4, weight=1)
         self.columnconfigure(2, weight=1)
 
-        st_editors[0].focus_set()
+        self._superstructure_listing.selection_set(0)
+        self._on_select_superstructure(None)
 
     def set_grid(self, grid_state):
         """set the grid for both top and side view according to grid_state"""
         self._side_view.refresh_grid(grid_state)
         self._top_view.switch_grid(grid_state)
+
+    def _on_select_superstructure(self, evt):
+        struct_index = self._superstructure_listing.curselection()[0]
+        for st in self._st_editors:
+            st.grid_remove()
+        self._st_editors[struct_index].grid()
+        self._st_editors[struct_index].focus_set()
 
 
 class LogToWidget(logging.Handler):
@@ -251,6 +288,7 @@ class LogToWidget(logging.Handler):
 
     With colors according to debug/info/warning/critical
     """
+
     def __init__(self, text_widget):
         super().__init__()
         self._text_widget = text_widget
@@ -261,14 +299,19 @@ class LogToWidget(logging.Handler):
 
     def emit(self, record):
         if record.levelno == logging.DEBUG:
-            self._text_widget.insert(tk.END, record.getMessage() + "\n", "Debug")
+            self._text_widget.insert(
+                tk.END, record.getMessage() + "\n", "Debug")
         if record.levelno == logging.INFO:
-            self._text_widget.insert(tk.END, record.getMessage() + "\n", "Info")
+            self._text_widget.insert(
+                tk.END, record.getMessage() + "\n", "Info")
         if record.levelno == logging.WARNING:
-            self._text_widget.insert(tk.END, record.getMessage() + "\n", "Warning")
+            self._text_widget.insert(
+                tk.END, record.getMessage() + "\n", "Warning")
         if record.levelno == logging.ERROR:
-            self._text_widget.insert(tk.END, record.getMessage() + "\n", "Error")
+            self._text_widget.insert(
+                tk.END, record.getMessage() + "\n", "Error")
         self._text_widget.see(tk.END)
+
 
 if __name__ == "__main__":
     MainWindow().mainloop()
