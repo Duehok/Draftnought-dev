@@ -82,7 +82,7 @@ class ShipData:
         torps = []
         for section, section_content in self._parser.items():
             if "Superstructure" in section:
-                new_struct = Structure(section, section_content)
+                new_struct = Structure(section, section_content, self.is_rtw2)
                 self.structures.append(new_struct)
             elif "Turret" in section:
                 turret_data[self._parser[section]["Pos"]
